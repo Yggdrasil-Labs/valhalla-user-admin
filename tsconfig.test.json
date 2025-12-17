@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@locales/*": [
+        "./src/locales/*"
+      ],
+      "@scss/*": [
+        "./src/assets/scss/*"
+      ]
+    },
+    "types": [
+      "vitest/globals",
+      "unplugin-vue-router/client"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/**/*.d.ts",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "vitest.config.ts"
+  ]
+}

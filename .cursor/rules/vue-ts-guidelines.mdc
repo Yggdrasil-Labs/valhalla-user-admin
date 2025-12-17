@@ -1,0 +1,248 @@
+---
+globs: src/**/*.ts,src/**/*.vue
+description: Vue 3 + TypeScript 编码约定与最佳实践
+---
+# Vue 3 + TypeScript 编码规范
+
+## 组件开发规范
+
+### 组件结构
+使用 `<script setup lang="ts">` 语法，按照以下顺序组织：
+
+```vue
+<script setup lang="ts">
+// 1. 导入语句
+import type { ComponentProps } from './types'
+import { computed, onMounted, ref } from 'vue'
+
+// 2. 接口定义
+interface Props {
+  title: string
+  count?: number
+}
+
+// 3. Props 定义
+const props = withDefaults(defineProps<Props>(), {
+  count: 0,
+})
+
+// 4. Emits 定义
+const emit = defineEmits<{
+  update: [value: string]
+  change: [id: number]
+}>()
+
+// 5. 响应式数据
+const isLoading = ref(false)
+const data = ref<Data[]>([])
+
+// 6. 计算属性
+const filteredData = computed(() => {
+  return data.value.filter(item => item.active)
+})
+
+// 7. 方法定义
+function handleClick() {
+  emit('update', 'new value')
+}
+
+// 8. 生命周期钩子
+onMounted(() => {
+  // 初始化逻辑
+})
+</script>
+```
+
+### 组件命名规范
+- **组件文件名**: 使用 PascalCase，如 `UserProfile.vue`
+- **组件名**: 使用 PascalCase，如 `UserProfile`
+- **多单词组件名**: 避免单个单词，如 `User` → `UserProfile`
+
+### Props 和 Emits 规范
+```typescript
+// ✅ 推荐：使用 TypeScript 接口定义 Props
+interface Props {
+  title: string
+  count?: number
+  items: Array<{ id: number, name: string }>
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  count: 0,
+})
+
+// ✅ 推荐：使用 TypeScript 定义 Emits
+const emit = defineEmits<{
+  update: [value: string]
+  change: [id: number]
+  delete: [id: number]
+}>()
+```
+
+## TypeScript 规范
+
+### 类型定义
+```typescript
+// ✅ 推荐：使用 interface 定义对象类型
+interface User {
+  id: number
+  name: string
+  email: string
+  avatar?: string
+}
+
+// ✅ 推荐：使用 type 定义联合类型
+type Status = 'pending' | 'approved' | 'rejected'
+
+// ✅ 推荐：使用泛型
+interface ApiResponse<T> {
+  data: T
+  message: string
+  success: boolean
+}
+```
+
+### 函数类型
+```typescript
+// ✅ 推荐：明确的参数和返回值类型
+function formatDate(date: Date): string {
+  return date.toISOString()
+}
+
+// ✅ 推荐：异步函数类型
+async function fetchUser(id: string): Promise<User> {
+  const response = await api.get(`/users/${id}`)
+  return response.data
+}
+```
+
+### 类型导入导出
+```typescript
+// ✅ 推荐：使用 type 关键字导入类型
+import type { ComputedRef, Ref } from 'vue'
+import type { ComponentProps } from './types'
+import type { ApiResponse, User } from '@/types/api'
+
+// ✅ 推荐：类型和值分别导入
+import { computed, ref } from 'vue'
+```
+
+### 严格类型检查
+```typescript
+// ✅ 推荐：避免 any 类型
+function processData(data: unknown): string {
+  if (typeof data === 'string') {
+    return data.toUpperCase()
+  }
+  return ''
+}
+
+// ✅ 推荐：使用类型守卫
+function isUser(obj: unknown): obj is User {
+  return typeof obj === 'object' && obj !== null && 'id' in obj
+}
+```
+
+## 组合式函数规范
+
+### 命名约定
+```typescript
+// ✅ 推荐：使用 use 前缀
+export function useUserData() {
+  const user = ref<User | null>(null)
+
+  const fetchUser = async (id: string) => {
+    // 获取用户数据
+  }
+
+  return {
+    user: readonly(user),
+    fetchUser,
+  }
+}
+```
+
+### 返回值规范
+```typescript
+// ✅ 推荐：返回响应式数据和方法
+export function useCounter(initialValue = 0) {
+  const count = ref(initialValue)
+
+  const increment = () => count.value++
+  const decrement = () => count.value--
+  const reset = () => count.value = initialValue
+
+  return {
+    count: readonly(count),
+    increment,
+    decrement,
+    reset,
+  }
+}
+```
+
+## 代码组织规范
+
+### 导入顺序
+```typescript
+// 1. Node.js 内置模块
+import path from 'node:path'
+
+// 2. 第三方库
+import axios from 'axios'
+import { computed, ref } from 'vue'
+
+// 3. 内部模块（按路径深度排序）
+import { useUserStore } from '@/stores/user'
+import { formatDate } from '@/utils/date'
+
+// 4. 相对导入
+import UserCard from './UserCard.vue'
+import type { UserProps } from './types'
+
+// 5. 样式导入
+import './style.scss'
+```
+
+### 文件组织
+- **页面组件**: 置于 `src/pages`，使用文件系统路由
+- **UI 组件**: 置于 `src/components`，按功能模块组织
+- **业务逻辑**: 抽取为 `useXxx` 形式的组合函数
+- **类型定义**: 置于 `src/types`，按模块分类
+
+## 最佳实践
+
+### 错误处理
+```typescript
+// ✅ 推荐：明确的错误处理
+async function fetchUser(id: string): Promise<User> {
+  try {
+    const response = await api.get(`/users/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Failed to fetch user:', error)
+    throw new Error('User not found')
+  }
+}
+```
+
+### 性能优化
+```typescript
+// ✅ 推荐：使用 computed 缓存计算结果
+const expensiveValue = computed(() => {
+  return heavyCalculation(props.data)
+})
+
+// ✅ 推荐：使用 watchEffect 进行副作用
+watchEffect(() => {
+  if (user.value) {
+    trackUserActivity(user.value.id)
+  }
+})
+```
+
+### 代码质量
+- 启用严格类型检查，避免 `any`、不必要的断言
+- 通过路径别名 `@/` 引入内部模块，避免深层相对路径
+- 禁止无处理地捕获异常，仅在需要的边界添加 try/catch
+- 仅为非显而易见的代码编写注释（意图、约束、边界条件）

@@ -1,0 +1,426 @@
+---
+globs: src/assets/**,src/components/**,*.scss,*.css
+description: 样式、资源与静态文件管理约定
+---
+# 样式与资源管理规范
+
+## 样式架构
+
+### SCSS 文件结构
+项目使用 Sass 作为 CSS 预处理器，文件结构位于 `src/assets/scss/`：
+
+```
+src/assets/scss/
+├── base/
+│   ├── _variables.scss    # 全局变量
+│   ├── _mixins.scss      # 混入函数
+│   ├── _functions.scss   # 工具函数
+│   └── _reset.scss       # 重置样式
+└── main.scss             # 主样式文件
+```
+
+### 全局样式配置
+在 [vite.config.ts](mdc:vite.config.ts) 中配置全局 SCSS 导入：
+
+```typescript
+css: {
+  preprocessorOptions: {
+    scss: {
+      // 全局导入 Sass 变量和混入
+      additionalData: `@use "@scss/base/variables" as *; @use "@scss/base/mixins" as *;`,
+      sourceMap: isDev,
+    },
+  },
+}
+```
+
+## 样式规范
+
+### SCSS 变量
+```scss
+// src/assets/scss/base/_variables.scss
+
+// 颜色变量
+$primary-color: #3b82f6;
+$secondary-color: #64748b;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$error-color: #ef4444;
+
+// 字体变量
+$font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-size-base: 16px;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// 间距变量
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// 断点变量
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+```
+
+### SCSS 混入
+```scss
+// src/assets/scss/base/_mixins.scss
+
+// 响应式断点混入
+@mixin mobile {
+  @media (max-width: #{$breakpoint-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$breakpoint-sm}) and (max-width: #{$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$breakpoint-md}) {
+    @content;
+  }
+}
+
+// Flexbox 混入
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 文本截断混入
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行文本截断混入
+@mixin text-truncate-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+```
+
+### SCSS 函数
+```scss
+// src/assets/scss/base/_functions.scss
+
+// 颜色函数
+@function lighten($color, $amount) {
+  @return mix(white, $color, $amount);
+}
+
+@function darken($color, $amount) {
+  @return mix(black, $color, $amount);
+}
+
+// 尺寸函数
+@function rem($pixels) {
+  @return #{$pixels / 16px}rem;
+}
+
+@function em($pixels, $context: 16px) {
+  @return #{$pixels / $context}em;
+}
+```
+
+## 组件样式规范
+
+### 样式作用域
+```vue
+<template>
+  <div class="user-card">
+    <img class="user-card__avatar" :src="user.avatar" :alt="user.name">
+    <div class="user-card__content">
+      <h3 class="user-card__name">{{ user.name }}</h3>
+      <p class="user-card__email">{{ user.email }}</p>
+    </div>
+  </div>
+</template>
+
+<style scoped lang="scss">
+.user-card {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  background: white;
+
+  &__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: $spacing-md;
+  }
+
+  &__content {
+    flex: 1;
+  }
+
+  &__name {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin: 0 0 $spacing-xs 0;
+  }
+
+  &__email {
+    color: $text-muted;
+    margin: 0;
+  }
+}
+</style>
+```
+
+### BEM 命名规范
+```scss
+// 使用 BEM (Block Element Modifier) 命名规范
+.button {
+  // Block: 按钮组件
+  
+  &--primary {
+    // Modifier: 主要按钮
+    background-color: $primary-color;
+    color: white;
+  }
+  
+  &--secondary {
+    // Modifier: 次要按钮
+    background-color: $secondary-color;
+    color: white;
+  }
+  
+  &__icon {
+    // Element: 按钮图标
+    margin-right: $spacing-sm;
+  }
+  
+  &--disabled {
+    // Modifier: 禁用状态
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+```
+
+## 响应式设计
+
+### 移动优先设计
+```scss
+.component {
+  // 移动端样式（默认）
+  padding: $spacing-sm;
+  font-size: $font-size-sm;
+
+  // 平板端样式
+  @include tablet {
+    padding: $spacing-md;
+    font-size: $font-size-base;
+  }
+
+  // 桌面端样式
+  @include desktop {
+    padding: $spacing-lg;
+    font-size: $font-size-lg;
+  }
+}
+```
+
+### 响应式网格
+```scss
+.grid {
+  display: grid;
+  gap: $spacing-md;
+
+  // 移动端：单列
+  grid-template-columns: 1fr;
+
+  // 平板端：两列
+  @include tablet {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // 桌面端：三列
+  @include desktop {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+```
+
+## 静态资源管理
+
+### 图片资源
+```
+public/
+├── images/
+│   ├── logo.svg
+│   ├── hero-banner.jpg
+│   └── icons/
+│       ├── home.svg
+│       └── user.svg
+└── favicon.ico
+```
+
+### 图片优化
+```vue
+<template>
+  <!-- 使用 WebP 格式，提供降级方案 -->
+  <picture>
+    <source srcset="/images/hero-banner.webp" type="image/webp">
+    <img src="/images/hero-banner.jpg" alt="Hero Banner" loading="lazy">
+  </picture>
+
+  <!-- 响应式图片 -->
+  <img
+    :src="getResponsiveImage(imageUrl, 400)"
+    :srcset="getResponsiveImageSet(imageUrl, [400, 800, 1200])"
+    sizes="(max-width: 768px) 400px, (max-width: 1200px) 800px, 1200px"
+    alt="Description"
+    loading="lazy"
+  >
+</template>
+
+<script setup lang="ts">
+function getResponsiveImage(url: string, width: number) {
+  return `${url}?w=${width}&q=80`
+}
+
+function getResponsiveImageSet(url: string, widths: number[]) {
+  return widths.map(w => `${url}?w=${w}&q=80 ${w}w`).join(', ')
+}
+</script>
+```
+
+### 字体资源
+```scss
+// 字体预加载
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; // 优化字体加载
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+```
+
+## 主题系统
+
+### CSS 变量
+```scss
+// 定义主题变量
+:root {
+  // 浅色主题
+  --color-primary: #3b82f6;
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+}
+
+[data-theme="dark"] {
+  // 深色主题
+  --color-primary: #60a5fa;
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+}
+```
+
+### 主题切换
+```vue
+<script setup lang="ts">
+import { useDark } from '@vueuse/core'
+
+const isDark = useDark({
+  selector: 'html',
+  attribute: 'data-theme',
+  valueDark: 'dark',
+  valueLight: 'light',
+})
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+}
+</script>
+```
+
+## 性能优化
+
+### CSS 代码分割
+```typescript
+// vite.config.ts
+build: {
+  cssCodeSplit: true, // 启用 CSS 代码分割
+  rollupOptions: {
+    output: {
+      assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
+    },
+  },
+}
+```
+
+### 关键 CSS
+```vue
+<style>
+/* 关键 CSS 内联到 HTML 中 */
+.critical-styles {
+  /* 首屏关键样式 */
+}
+</style>
+
+<style scoped lang="scss">
+/* 非关键样式使用 scoped */
+.component-styles {
+  /* 组件特定样式 */
+}
+</style>
+```
+
+## 最佳实践
+
+### 样式组织
+- 使用 SCSS 变量和混入提高复用性
+- 遵循 BEM 命名规范
+- 使用 scoped 样式避免全局污染
+- 合理使用 CSS 变量实现主题切换
+
+### 性能考虑
+- 使用 `font-display: swap` 优化字体加载
+- 图片使用 `loading="lazy"` 实现懒加载
+- 合理使用 CSS 代码分割
+- 避免深层嵌套选择器
+
+### 可维护性
+- 保持样式文件结构清晰
+- 使用有意义的类名
+- 避免使用 `!important`
+- 定期重构和优化样式代码

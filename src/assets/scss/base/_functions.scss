@@ -1,0 +1,94 @@
+// =============================================================================
+// Sass 函数 - 简化版
+// =============================================================================
+
+@use 'sass:map';
+@use '_variables' as *;
+
+// 颜色函数
+// -----------------------------------------------------------------------------
+@function get-color($key) {
+  @if map.has-key($colors, $key) {
+    @return map.get($colors, $key);
+  }
+  @warn "Unknown color: #{$key}";
+  @return null;
+}
+
+// 间距函数
+// -----------------------------------------------------------------------------
+@function spacing($key) {
+  @if map.has-key($spacings, $key) {
+    @return map.get($spacings, $key);
+  }
+  @warn "Unknown spacing: #{$key}";
+  @return null;
+}
+
+// 字体函数
+// -----------------------------------------------------------------------------
+@function font-size($key) {
+  @if map.has-key($font-sizes, $key) {
+    @return map.get($font-sizes, $key);
+  }
+  @warn "Unknown font size: #{$key}";
+  @return null;
+}
+
+@function font-weight($key) {
+  @if map.has-key($font-weights, $key) {
+    @return map.get($font-weights, $key);
+  }
+  @warn "Unknown font weight: #{$key}";
+  @return null;
+}
+
+// 断点函数
+// -----------------------------------------------------------------------------
+@function breakpoint($key) {
+  @if map.has-key($breakpoints, $key) {
+    @return map.get($breakpoints, $key);
+  }
+  @warn "Unknown breakpoint: #{$key}";
+  @return null;
+}
+
+// 边框圆角函数
+// -----------------------------------------------------------------------------
+@function border-radius($key) {
+  @if map.has-key($border-radius, $key) {
+    @return map.get($border-radius, $key);
+  }
+  @warn "Unknown border radius: #{$key}";
+  @return null;
+}
+
+// 阴影函数
+// -----------------------------------------------------------------------------
+@function shadow($key) {
+  @if map.has-key($shadows, $key) {
+    @return map.get($shadows, $key);
+  }
+  @warn "Unknown shadow: #{$key}";
+  @return null;
+}
+
+// Z-index 函数
+// -----------------------------------------------------------------------------
+@function z-index($key) {
+  @if map.has-key($z-indexes, $key) {
+    @return map.get($z-indexes, $key);
+  }
+  @warn "Unknown z-index: #{$key}";
+  @return null;
+}
+
+// 过渡函数
+// -----------------------------------------------------------------------------
+@function transition($key) {
+  @if map.has-key($transitions, $key) {
+    @return map.get($transitions, $key);
+  }
+  @warn "Unknown transition: #{$key}";
+  @return null;
+}

@@ -1,0 +1,380 @@
+---
+globs: vite.config.ts,tsconfig*.json,*.config.js
+description: Vite 插件、自动导入与路径别名规则
+---
+# Vite 配置与插件规范
+
+## Vite 核心配置
+
+### 基础配置
+项目使用 Vite 7+ 作为构建工具，配置文件位于 [vite.config.ts](mdc:vite.config.ts)：
+
+```typescript
+import path from 'node:path'
+import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { VueRouterAutoImports } from 'unplugin-vue-router'
+import VueRouter from 'unplugin-vue-router/vite'
+import { defineConfig, loadEnv } from 'vite'
+
+export default defineConfig(({ mode, command }) => {
+  const envVars = loadEnv(mode, '.', '')
+  const isDev = command === 'serve'
+  const isProd = command === 'build'
+
+  return {
+    plugins: [
+      // 核心插件配置
+    ],
+    // 其他配置
+  }
+})
+```
+
+## 核心插件配置
+
+### Vue 插件
+```typescript
+vue({
+  // 启用模板编译优化
+  template: {
+    compilerOptions: {
+      // 移除生产环境的注释
+      comments: !isProd,
+    },
+  },
+})
+```
+
+### Vue Router 自动路由
+```typescript
+VueRouter({
+  dts: 'src/types/typed-router.d.ts',
+  // 自动生成路由元信息
+  routesFolder: 'src/pages',
+})
+```
+
+### 组件自动导入
+```typescript
+Components({
+  dts: 'src/types/components.d.ts',
+  dirs: ['src/components'],
+  // 自动导入组件
+  resolvers: [],
+  // 包含的文件类型
+  include: [/\.vue$/, /\.vue\?vue/],
+  // 排除的文件
+  exclude: [/[\\/]node_modules[\\/]/, /[\\/]\.git[\\/]/, /[\\/]\.nuxt[\\/]/],
+})
+```
+
+### API 自动导入
+```typescript
+AutoImport({
+  imports: [
+    'vue',
+    'vue-i18n',
+    'vue-router',
+    'pinia',
+    '@vueuse/core',
+    VueRouterAutoImports,
+  ],
+  dts: 'src/types/auto-imports.d.ts',
+  vueTemplate: true, // 允许在 <template> 直接使用自动导入的 API
+})
+```
+
+## 路径别名配置
+
+### 别名定义
+```typescript
+resolve: {
+  alias: {
+    '@': path.resolve(__dirname, './src'),
+    '@components': path.resolve(__dirname, './src/components'),
+    '@locales': path.resolve(__dirname, './src/locales'),
+    '@scss': path.resolve(__dirname, './src/assets/scss'),
+  },
+}
+```
+
+### TypeScript 路径映射
+在 `tsconfig.app.json` 中配置对应的路径映射：
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@locales/*": ["src/locales/*"],
+      "@scss/*": ["src/assets/scss/*"]
+    }
+  }
+}
+```
+
+### 使用示例
+```typescript
+// ✅ 推荐：使用路径别名
+import { useUserStore } from '@/stores/user'
+import { formatDate } from '@/utils/date'
+import UserCard from '@components/UserCard.vue'
+import { API_ENDPOINTS } from '@/constants/api'
+
+// ❌ 不推荐：使用相对路径
+import { useUserStore } from '../../../stores/user'
+import { formatDate } from '../../utils/date'
+```
+
+## SCSS 配置
+
+### 全局 SCSS 导入
+```typescript
+css: {
+  preprocessorOptions: {
+    scss: {
+      // 全局导入 Sass 变量和混入
+      additionalData: `@use "@scss/base/variables" as *; @use "@scss/base/mixins" as *;`,
+      // 启用源映射（开发环境）
+      sourceMap: isDev,
+    },
+  },
+  // 启用 CSS 代码分割
+  devSourcemap: isDev,
+}
+```
+
+### SCSS 文件结构
+```
+src/assets/scss/
+├── base/
+│   ├── _variables.scss    # 全局变量
+│   ├── _mixins.scss      # 混入函数
+│   ├── _functions.scss   # 工具函数
+│   └── _reset.scss       # 重置样式
+└── main.scss             # 主样式文件
+```
+
+## 开发服务器配置
+
+### 服务器选项
+```typescript
+server: {
+  host: true, // 允许局域网访问
+  port: Number(envVars.VITE_PORT) || 5173,
+  open: false,
+  // 启用 HTTPS（可选）
+  // https: isDev && envVars.VITE_HTTPS === 'true',
+  
+  // 代理配置
+  proxy: {
+    '/api': {
+      target: envVars.VITE_API_BASE_URL || 'http://localhost:8080',
+      changeOrigin: true,
+      rewrite: path => path.replace(/^\/api/, ''),
+      timeout: 10000,
+    },
+  },
+  
+  // 开发服务器优化
+  hmr: {
+    overlay: true,
+  },
+  
+  // 文件监听优化
+  watch: {
+    usePolling: false,
+    interval: 100,
+  },
+}
+```
+
+### 环境变量
+```typescript
+// 加载环境变量
+const envVars = loadEnv(mode, '.', '')
+
+// 使用环境变量
+server: {
+  port: Number(envVars.VITE_PORT) || 5173,
+  proxy: {
+    '/api': {
+      target: envVars.VITE_API_BASE_URL || 'http://localhost:8080',
+    },
+  },
+}
+```
+
+## 构建配置
+
+### 构建优化
+```typescript
+build: {
+  target: 'esnext',
+  outDir: 'dist',
+  assetsDir: 'static',
+  sourcemap: isDev,
+  // 构建优化
+  minify: isProd ? 'esbuild' : false,
+  // 启用 CSS 代码分割
+  cssCodeSplit: true,
+  // 构建大小警告阈值
+  chunkSizeWarningLimit: 1000,
+  
+  rollupOptions: {
+    output: {
+      chunkFileNames: 'static/js/[name]-[hash].js',
+      entryFileNames: 'static/js/[name]-[hash].js',
+      assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
+      
+      // 优化的代码分割策略
+      manualChunks: {
+        // Vue 核心库
+        'vue-vendor': ['vue', 'vue-router'],
+        // UI 库
+        'ui-vendor': ['@vueuse/core'],
+        // HTTP 库
+        'http-vendor': ['axios'],
+        // 国际化
+        'i18n-vendor': ['vue-i18n'],
+        // 状态管理
+        'store-vendor': ['pinia', 'pinia-plugin-persistedstate'],
+        // 公共工具
+        'common': ['src/utils', 'src/composables'],
+      },
+    },
+  },
+}
+```
+
+### 依赖优化
+```typescript
+optimizeDeps: {
+  include: [
+    'vue',
+    'vue-router',
+    'pinia',
+    'vue-i18n',
+    '@vueuse/core',
+    'axios',
+  ],
+  exclude: [],
+}
+```
+
+## 环境变量配置
+
+### 环境变量定义
+```typescript
+// 环境变量定义
+define: {
+  __APP_VERSION__: JSON.stringify(pkg.version),
+  __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+}
+```
+
+### 环境变量类型
+```typescript
+// src/config/env.ts
+interface ImportMetaEnv {
+  readonly VITE_APP_TITLE: string
+  readonly VITE_API_BASE_URL: string
+  readonly VITE_PORT: string
+  readonly VITE_HTTPS: string
+  readonly VITE_CDN_URL?: string
+  readonly VITE_ANALYTICS_ID?: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
+export const env = {
+  APP_TITLE: import.meta.env.VITE_APP_TITLE,
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  PORT: Number(import.meta.env.VITE_PORT) || 5173,
+  HTTPS: import.meta.env.VITE_HTTPS === 'true',
+  CDN_URL: import.meta.env.VITE_CDN_URL,
+  ANALYTICS_ID: import.meta.env.VITE_ANALYTICS_ID,
+}
+```
+
+## 自动导入功能
+
+### Vue API 自动导入
+```typescript
+// 无需手动导入，可直接使用
+const count = ref(0)
+const doubled = computed(() => count.value * 2)
+const increment = () => count.value++
+
+// 生命周期钩子
+onMounted(() => {
+  console.log('组件已挂载')
+})
+```
+
+### Vue Router 自动导入
+```typescript
+// 无需手动导入，可直接使用
+const router = useRouter()
+const route = useRoute()
+
+// 编程式导航
+router.push('/dashboard')
+```
+
+### Pinia 自动导入
+```typescript
+// 无需手动导入，可直接使用
+const userStore = useUserStore()
+const { user, isLoggedIn } = storeToRefs(userStore)
+```
+
+### VueUse 自动导入
+```typescript
+// 无需手动导入，可直接使用
+const { isDark, toggle } = useDark()
+const { copy, isSupported } = useClipboard()
+const { width, height } = useWindowSize()
+```
+
+### 组件自动导入
+```vue
+<template>
+  <!-- 无需手动导入，可直接使用 -->
+  <UserCard :user="currentUser" />
+  <LanguageSwitcher />
+  <HelloWorld />
+</template>
+```
+
+## 最佳实践
+
+### 配置管理
+- 使用环境变量管理不同环境的配置
+- 合理配置路径别名，避免深层相对路径
+- 启用自动导入，减少重复的导入语句
+- 使用 TypeScript 确保配置的类型安全
+
+### 性能优化
+- 合理配置代码分割策略
+- 启用 CSS 代码分割
+- 优化依赖预构建
+- 使用适当的构建目标
+
+### 开发体验
+- 配置热重载和错误覆盖
+- 使用代理解决跨域问题
+- 启用源映射便于调试
+- 配置自动打开浏览器
+
+### 可维护性
+- 保持配置文件结构清晰
+- 使用有意义的别名名称
+- 合理组织插件配置
+- 定期更新和优化配置

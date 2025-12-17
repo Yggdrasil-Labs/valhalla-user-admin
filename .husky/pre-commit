@@ -1,0 +1,2 @@
+npx lint-staged       # 运行 Lint 检查
+pnpm run type-check    # TypeScript 类型检查

@@ -1,0 +1,305 @@
+---
+globs: package.json,commitlint.config.js,.husky/**,*.md
+description: 提交规范、发布流程与 Git 工作流
+---
+# 提交规范与发布流程
+
+## 提交信息规范
+
+### Conventional Commits
+项目采用 **Conventional Commits** 规范，配置文件位于 [commitlint.config.js](mdc:commitlint.config.js)：
+
+```javascript
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'references-empty': [2, 'never'], // 提交需包含 issue 引用
+    'body-max-line-length': [1, 'always', 500], // 正文最大长度
+  },
+}
+```
+
+### 提交格式
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### 提交类型
+- **feat**: 新功能
+- **fix**: 修复 bug
+- **docs**: 文档更新
+- **style**: 代码格式调整（不影响功能）
+- **refactor**: 代码重构
+- **perf**: 性能优化
+- **test**: 测试相关
+- **build**: 构建系统或外部依赖变更
+- **ci**: CI 配置文件和脚本变更
+- **chore**: 其他不修改 src 或 test 文件的变更
+
+### 提交示例
+```bash
+# 新功能
+feat(auth): add OAuth2 login support
+
+# 修复 bug
+fix(router): resolve navigation guard issue
+
+# 文档更新
+docs: update API documentation
+
+# 重构
+refactor(store): simplify user state management
+
+# 性能优化
+perf(components): optimize image loading
+
+# 测试
+test(utils): add unit tests for date formatting
+
+# 构建
+build: update Vite to v7.1.11
+
+# CI
+ci: add GitHub Actions workflow
+
+# 其他
+chore: update dependencies
+```
+
+## 预提交检查
+
+### Husky 配置
+项目使用 Husky 管理 Git hooks，配置位于 `.husky/` 目录：
+
+```bash
+# .husky/pre-commit
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx lint-staged
+```
+
+### Lint-staged 配置
+在 [package.json](mdc:package.json) 中配置：
+
+```json
+{
+  "lint-staged": {
+    "*.{ts,tsx,vue,js,json,md,yml}": "eslint --fix",
+    "*.{test,spec}.{ts,tsx,vue,js}": "eslint --fix"
+  }
+}
+```
+
+### 提交信息检查
+```bash
+# .husky/commit-msg
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx --no -- commitlint --edit ${1}
+```
+
+## 版本管理
+
+### Semantic Release 配置
+项目使用 `semantic-release` 自动化版本管理，配置位于 [package.json](mdc:package.json)：
+
+```json
+{
+  "release": {
+    "branches": ["main"],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      [
+        "@semantic-release/npm",
+        {
+          "npmPublish": false
+        }
+      ],
+      "@semantic-release/github",
+      [
+        "@semantic-release/git",
+        {
+          "assets": ["CHANGELOG.md", "package.json"],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+          "gitOptions": {
+            "signed": true
+          }
+        }
+      ]
+    ]
+  }
+}
+```
+
+### 版本发布流程
+1. **提交代码**: 使用 Conventional Commits 格式
+2. **自动分析**: `semantic-release` 分析提交信息
+3. **生成版本**: 根据提交类型自动生成版本号
+4. **更新文档**: 自动更新 `CHANGELOG.md`
+5. **创建标签**: 自动创建 Git 标签
+6. **发布**: 自动发布到 GitHub
+
+### 发布命令
+```bash
+# 本地预览发布流程（不实际发布）
+pnpm release:dry-run
+
+# CI 环境发布
+pnpm release:ci
+
+# 手动发布
+pnpm release
+```
+
+## Git 工作流
+
+### 分支策略
+- **main**: 主分支，用于生产环境
+- **develop**: 开发分支，用于集成功能
+- **feature/***: 功能分支，如 `feature/user-auth`
+- **bugfix/***: 修复分支，如 `bugfix/login-error`
+- **hotfix/***: 热修复分支，如 `hotfix/security-patch`
+
+### 分支命名规范
+```bash
+# 功能分支
+feature/user-authentication
+feature/dashboard-redesign
+
+# 修复分支
+bugfix/login-validation
+bugfix/memory-leak
+
+# 热修复分支
+hotfix/security-vulnerability
+hotfix/critical-bug
+
+# 发布分支
+release/v1.2.0
+```
+
+### 提交规范
+```bash
+# 创建功能分支
+git checkout -b feature/user-profile
+
+# 提交代码
+git add .
+git commit -m "feat(user): add user profile component"
+
+# 推送分支
+git push origin feature/user-profile
+
+# 创建 Pull Request
+# 合并后删除分支
+git branch -d feature/user-profile
+```
+
+## 代码审查
+
+### Pull Request 模板
+```markdown
+## 变更描述
+<!-- 描述本次变更的内容和目的 -->
+
+## 变更类型
+- [ ] Bug 修复
+- [ ] 新功能
+- [ ] 破坏性变更
+- [ ] 文档更新
+- [ ] 代码重构
+- [ ] 性能优化
+
+## 测试
+- [ ] 单元测试
+- [ ] 集成测试
+- [ ] E2E 测试
+- [ ] 手动测试
+
+## 检查清单
+- [ ] 代码符合项目规范
+- [ ] 类型定义完整
+- [ ] 错误处理完善
+- [ ] 测试覆盖充分
+- [ ] 文档更新完整
+```
+
+### 审查要点
+- **代码质量**: 遵循项目编码规范
+- **功能完整性**: 确保功能按预期工作
+- **测试覆盖**: 确保有足够的测试覆盖
+- **文档更新**: 确保相关文档已更新
+- **性能影响**: 评估性能影响
+- **安全性**: 检查潜在的安全问题
+
+## 发布流程
+
+### 开发流程
+1. **创建分支**: 从 `main` 创建功能分支
+2. **开发功能**: 在分支上开发功能
+3. **提交代码**: 使用规范的提交信息
+4. **创建 PR**: 创建 Pull Request
+5. **代码审查**: 团队成员审查代码
+6. **合并代码**: 审查通过后合并到 `main`
+7. **自动发布**: `semantic-release` 自动发布
+
+### 发布检查清单
+- [ ] 所有测试通过
+- [ ] 代码审查完成
+- [ ] 文档更新完整
+- [ ] 版本号正确
+- [ ] 变更日志更新
+- [ ] 依赖项检查
+
+### 回滚策略
+```bash
+# 回滚到上一个版本
+git revert <commit-hash>
+
+# 回滚到指定标签
+git checkout <tag-name>
+
+# 创建回滚 PR
+git checkout -b hotfix/rollback-v1.2.0
+git revert <commit-hash>
+git push origin hotfix/rollback-v1.2.0
+```
+
+## 最佳实践
+
+### 提交规范
+- 使用清晰的提交信息
+- 一个提交只做一件事
+- 提交前运行测试
+- 使用有意义的提交类型
+
+### 分支管理
+- 保持分支简洁
+- 及时删除已合并的分支
+- 使用有意义的分支名
+- 避免在 `main` 分支直接提交
+
+### 代码审查
+- 及时审查代码
+- 提供建设性反馈
+- 关注代码质量
+- 确保测试覆盖
+
+### 发布管理
+- 使用语义化版本
+- 保持变更日志更新
+- 测试发布流程
+- 监控发布结果

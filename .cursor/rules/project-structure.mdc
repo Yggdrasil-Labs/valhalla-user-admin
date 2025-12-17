@@ -1,0 +1,117 @@
+---
+alwaysApply: true
+---
+# Asgard Frontend Template 项目结构
+
+## 项目概述
+基于 Vue 3 + TypeScript + Vite 的现代化前端模板项目，集成了完整的开发工具链和最佳实践。
+
+## 核心架构
+
+### 入口文件
+- **HTML 入口**: [index.html](mdc:index.html) 注入 [src/main.ts](mdc:src/main.ts)
+- **应用根组件**: [src/App.vue](mdc:src/App.vue)
+- **路由配置**: [src/router/index.ts](mdc:src/router/index.ts) 使用 `unplugin-vue-router` 自动路由
+
+### 目录结构
+```
+src/
+├── api/                 # API 接口层
+│   ├── http.ts         # HTTP 客户端封装
+│   ├── request.ts      # 请求拦截器配置
+│   └── modules/        # 业务模块 API
+├── assets/             # 静态资源
+│   └── scss/          # SCSS 样式文件
+├── components/        # 通用组件
+├── composables/       # 组合式函数
+├── config/            # 配置文件
+├── constants/         # 常量定义
+├── locales/           # 国际化资源
+├── pages/             # 页面组件（自动路由）
+├── router/            # 路由配置
+├── stores/            # 状态管理
+├── types/             # TypeScript 类型定义
+└── utils/             # 工具函数
+```
+
+## 技术栈
+
+### 核心框架
+- **Vue 3.5+**: 渐进式 JavaScript 框架
+- **TypeScript 5.9+**: 类型安全的 JavaScript 超集
+- **Vite 7+**: 下一代前端构建工具
+
+### 状态管理与路由
+- **Pinia**: Vue 3 状态管理库
+- **Vue Router 4**: Vue.js 官方路由管理器
+- **unplugin-vue-router**: 基于文件系统的自动路由
+
+### 开发工具
+- **ESLint**: 使用 `@antfu/eslint-config` 配置
+- **Prettier**: 代码格式化工具
+- **Husky**: Git hooks 工具
+- **lint-staged**: 暂存文件检查工具
+
+### 测试框架
+- **Vitest**: 基于 Vite 的单元测试框架
+- **Playwright**: 端到端测试工具
+- **@testing-library/vue**: Vue 组件测试工具
+
+### 工具库
+- **@vueuse/core**: Vue 组合式函数工具库
+- **Axios**: HTTP 客户端库
+- **Vue I18n**: Vue.js 国际化插件
+- **Sass**: CSS 预处理器
+
+## 开发命令
+
+### 基础命令
+- `pnpm dev`: 启动开发服务器
+- `pnpm build`: 构建生产版本
+- `pnpm preview`: 预览构建结果
+- `pnpm type-check`: TypeScript 类型检查
+
+### 代码质量
+- `pnpm lint`: ESLint 检查
+- `pnpm lint:fix`: ESLint 自动修复
+
+### 测试
+- `pnpm test`: 运行单元测试
+- `pnpm test:coverage`: 生成测试覆盖率报告
+- `pnpm test:e2e`: 运行端到端测试
+
+### 发布
+- `pnpm release`: 自动化发布
+- `pnpm release:dry-run`: 预览发布流程
+
+## 配置说明
+
+### 路径别名
+- `@`: `src/` 目录
+- `@components`: `src/components/` 目录
+- `@locales`: `src/locales/` 目录
+- `@scss`: `src/assets/scss/` 目录
+
+### 自动导入
+- **Vue API**: `ref`, `computed`, `watch` 等
+- **Vue Router**: `useRouter`, `useRoute` 等
+- **Pinia**: `useStore` 等
+- **VueUse**: `useLocalStorage`, `useDark` 等
+- **组件**: `src/components/` 下的组件自动导入
+
+## 开发约定
+
+### 文件命名
+- **组件文件**: PascalCase (`UserProfile.vue`)
+- **页面文件**: kebab-case (`user-profile.vue`)
+- **工具文件**: camelCase (`formatDate.ts`)
+- **常量文件**: UPPER_SNAKE_CASE (`API_ENDPOINTS.ts`)
+
+### 路由约定
+- 新页面放置于 `src/pages`（由 `unplugin-vue-router` 扫描）
+- 路由基于文件系统自动生成，避免手写路由表
+- 静态公共资源优先置于 `public/`，打包时保持原路径
+
+### 环境变量
+- 变量名必须以 `VITE_` 开头才能在客户端使用
+- 支持多环境配置：`.env.local`, `.env.test`, `.env.production`

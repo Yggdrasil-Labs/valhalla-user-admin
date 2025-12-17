@@ -1,0 +1,42 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "incremental": true, /* 启用增量编译 */
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo", /* 指定 TypeScript 增量编译过程中生成的 .tsbuildinfo 文件的存储路径 */
+    "baseUrl": ".",
+    "rootDir": ".", /* 源码根目录 */
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@locales/*": [
+        "./src/locales/*"
+      ],
+      "@scss/*": [
+        "./src/assets/scss/*"
+      ]
+    },
+    "types": [
+      "unplugin-vue-router/client"
+    ],
+    "strictNullChecks": true, /* 强制检查 null/undefined（减少运行时错误） */
+    "noFallthroughCasesInSwitch": true, /* 防止 switch case 穿透 */
+    /* Linting */
+    "noImplicitAny": true, /* 禁止隐式 any 类型（提升代码质量） */
+    "outDir": "./dist", /* 输出目录 */
+    "sourceMap": true, /* 生成 .map 文件方便调试 */
+    "isolatedModules": true, /* 强制每个文件作为独立模块编译 */
+    "noUncheckedSideEffectImports": true /* 防止未显式使用的副作用导入 */
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/**/*.d.ts",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ]
+}

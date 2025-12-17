@@ -1,0 +1,12 @@
+name: Reusable CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  call-org-ci:
+    uses: Yggdrasil-Labs/.github/.github/workflows/ci.yml@main
+    permissions: read-all

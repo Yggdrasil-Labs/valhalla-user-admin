@@ -1,0 +1,298 @@
+---
+globs: src/pages/**,src/router/**
+description: 文件系统路由（unplugin-vue-router）使用规范
+---
+# 文件系统路由规范
+
+## 路由系统概述
+
+项目使用 `unplugin-vue-router` 实现基于文件系统的自动路由，配置文件位于 [vite.config.ts](mdc:vite.config.ts)：
+
+```typescript
+VueRouter({
+  dts: 'src/types/typed-router.d.ts',
+  routesFolder: 'src/pages',
+})
+```
+
+## 路由配置
+
+### 基础配置
+- **路由文件夹**: `src/pages/` 目录
+- **类型生成**: 自动生成 `src/types/typed-router.d.ts`
+- **路由入口**: [src/router/index.ts](mdc:src/router/index.ts)
+
+### 路由实例
+```typescript
+// src/router/index.ts
+import { createRouter, createWebHistory } from 'vue-router'
+import { routes } from 'vue-router/auto-routes'
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+```
+
+## 文件系统路由规则
+
+### 基础路由
+```
+src/pages/
+├── index.vue          # 对应路由: /
+├── about.vue          # 对应路由: /about
+├── contact.vue        # 对应路由: /contact
+└── user/
+    ├── index.vue      # 对应路由: /user
+    ├── profile.vue    # 对应路由: /user/profile
+    └── settings.vue   # 对应路由: /user/settings
+```
+
+### 动态路由
+```
+src/pages/
+├── user/
+│   └── [id].vue       # 对应路由: /user/:id
+├── post/
+│   └── [slug].vue     # 对应路由: /post/:slug
+└── category/
+    └── [id]/
+        └── [slug].vue # 对应路由: /category/:id/:slug
+```
+
+### 嵌套路由
+```
+src/pages/
+├── dashboard/
+│   ├── index.vue      # 对应路由: /dashboard
+│   ├── analytics.vue  # 对应路由: /dashboard/analytics
+│   └── settings.vue   # 对应路由: /dashboard/settings
+└── admin/
+    ├── index.vue      # 对应路由: /admin
+    └── users/
+        ├── index.vue  # 对应路由: /admin/users
+        └── [id].vue   # 对应路由: /admin/users/:id
+```
+
+## 页面组件规范
+
+### 组件结构
+```vue
+<!-- src/pages/user/profile.vue -->
+<script setup lang="ts">
+// 页面组件使用与普通组件相同的结构
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const user = ref(null)
+
+onMounted(() => {
+  // 页面初始化逻辑
+})
+</script>
+
+<template>
+  <div class="user-profile">
+    <h1>用户资料</h1>
+    <!-- 页面内容 -->
+  </div>
+</template>
+
+<style scoped lang="scss">
+.user-profile {
+  // 页面样式
+}
+</style>
+```
+
+### 路由元信息
+```vue
+<script setup lang="ts">
+// 定义路由元信息
+definePage({
+  meta: {
+    title: '用户资料',
+    requiresAuth: true,
+    layout: 'default',
+  },
+})
+</script>
+```
+
+## 路由守卫
+
+### 全局守卫
+```typescript
+// src/router/index.ts
+import { createRouter, createWebHistory } from 'vue-router'
+import { routes } from 'vue-router/auto-routes'
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+// 全局前置守卫
+router.beforeEach((to, from, next) => {
+  // 检查认证状态
+  if (to.meta.requiresAuth && !isAuthenticated()) {
+    next('/login')
+  } else {
+    next()
+  }
+})
+
+// 全局后置钩子
+router.afterEach((to) => {
+  // 设置页面标题
+  document.title = to.meta.title || 'Asgard Frontend Template'
+})
+```
+
+### 组件内守卫
+```vue
+<script setup lang="ts">
+import { onBeforeRouteLeave } from 'vue-router'
+
+// 组件内守卫
+onBeforeRouteLeave((to, from) => {
+  // 离开页面前的逻辑
+  if (hasUnsavedChanges()) {
+    return confirm('确定要离开吗？未保存的更改将丢失。')
+  }
+})
+</script>
+```
+
+## 路由参数和查询
+
+### 获取路由参数
+```vue
+<script setup lang="ts">
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// 获取动态路由参数
+const userId = computed(() => route.params.id as string)
+
+// 获取查询参数
+const searchQuery = computed(() => route.query.q as string)
+
+// 监听路由变化
+watch(() => route.params.id, (newId) => {
+  if (newId) {
+    fetchUserData(newId as string)
+  }
+})
+</script>
+```
+
+### 编程式导航
+```vue
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// 基本导航
+function goToUser(id: string) {
+  router.push(`/user/${id}`)
+}
+
+// 带查询参数
+function searchUsers(query: string) {
+  router.push({
+    path: '/users',
+    query: { q: query }
+  })
+}
+
+// 替换当前路由
+function replaceRoute() {
+  router.replace('/dashboard')
+}
+
+// 返回上一页
+function goBack() {
+  router.go(-1)
+}
+</script>
+```
+
+## 路由布局
+
+### 布局组件
+```vue
+<!-- src/layouts/DefaultLayout.vue -->
+<template>
+  <div class="default-layout">
+    <header class="header">
+      <nav class="nav">
+        <!-- 导航菜单 -->
+      </nav>
+    </header>
+    
+    <main class="main">
+      <router-view />
+    </main>
+    
+    <footer class="footer">
+      <!-- 页脚内容 -->
+    </footer>
+  </div>
+</template>
+```
+
+### 使用布局
+```vue
+<script setup lang="ts">
+// 在页面组件中指定布局
+definePage({
+  meta: {
+    layout: 'default'
+  }
+})
+</script>
+```
+
+## 最佳实践
+
+### 文件命名
+- **页面文件**: 使用 kebab-case (`user-profile.vue`)
+- **动态路由**: 使用方括号 `[id].vue`
+- **嵌套路由**: 使用文件夹结构
+- **索引页面**: 使用 `index.vue`
+
+### 路由组织
+- 按功能模块组织页面文件
+- 避免过深的嵌套结构（建议不超过 3 层）
+- 使用有意义的文件名和路径
+
+### 性能优化
+- 使用路由懒加载（自动支持）
+- 合理使用路由缓存
+- 避免在路由守卫中进行重计算
+
+### 类型安全
+- 利用自动生成的 `typed-router.d.ts` 类型
+- 为路由参数和查询参数定义类型
+- 使用 TypeScript 确保路由安全
+
+## 注意事项
+
+### 文件系统限制
+- 文件名不能包含特殊字符
+- 避免使用保留字作为文件名
+- 确保文件路径的唯一性
+
+### 路由冲突
+- 避免创建冲突的路由规则
+- 动态路由优先级高于静态路由
+- 使用 `index.vue` 处理默认路由
+
+### 开发调试
+- 使用 Vue DevTools 查看路由状态
+- 利用浏览器开发者工具调试路由
+- 检查自动生成的路由类型定义

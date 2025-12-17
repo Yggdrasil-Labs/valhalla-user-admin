@@ -1,0 +1,239 @@
+---
+globs: src/**,*.ts,*.vue,*.js,*.json
+description: 代码风格、ESLint 约定与常见规范
+---
+# 代码风格与 ESLint 规范
+
+## ESLint 配置
+
+### 基础配置
+项目使用 `@antfu/eslint-config` 作为基础配置，位于 [eslint.config.js](mdc:eslint.config.js)：
+
+```javascript
+export default antfu({
+  formatters: true,
+  ignores: [
+    '.github/**',
+    '.vscode/**',
+  ],
+  rules: {
+    'no-console': ['warn', {
+      allow: ['log', 'warn', 'error'], // 允许常用的 console 方法
+    }],
+  },
+  test: true,
+  testRules: {
+    'no-console': 'off', // 测试文件中允许 console
+    '@typescript-eslint/no-explicit-any': 'off', // 测试文件中允许 any
+    'vue/multi-word-component-names': 'off', // 测试文件中允许单单词组件名
+  },
+})
+```
+
+### 核心规则
+
+#### 通用规则
+- 遵循 `@antfu/eslint-config` 默认规则集
+- 允许使用 `console.log/warn/error`，其他 `console` 方法仍警告
+- 避免未使用的变量与导入，尽量使用解构与 const
+- 优先使用自动修复：`pnpm lint:fix`
+
+#### TypeScript 规则
+- 启用严格模式与空检查（见 `tsconfig.app.json`）
+- 禁止隐式 `any`，导出公共 API 明确类型注解
+- 避免多余的 `try/catch`，不要吞掉异常
+- 使用 `@typescript-eslint/no-explicit-any` 限制 any 使用
+
+#### Vue 模板规则
+- 使用 `vueTemplate: true` 的自动导入，在 `<template>` 可直接调用组合式 API
+- 组件 `props`/`emits` 类型清晰
+- 避免在模板中进行复杂逻辑，移至 `<script setup>`
+- 使用 `vue/multi-word-component-names` 确保组件名多单词
+
+## 代码风格规范
+
+### 命名约定
+
+#### 文件命名
+- **组件文件**: PascalCase (`UserProfile.vue`)
+- **页面文件**: kebab-case (`user-profile.vue`)
+- **工具文件**: camelCase (`formatDate.ts`)
+- **类型文件**: camelCase (`userTypes.ts`)
+- **常量文件**: UPPER_SNAKE_CASE (`API_ENDPOINTS.ts`)
+- **测试文件**: `*.test.ts` 或 `*.spec.ts`
+
+#### 变量命名
+```typescript
+// ✅ 推荐：使用 camelCase
+const userName = 'john'
+const isLoggedIn = true
+const userList = []
+
+// ✅ 推荐：常量使用 UPPER_SNAKE_CASE
+const API_BASE_URL = 'https://api.example.com'
+const MAX_RETRY_COUNT = 3
+
+// ✅ 推荐：类型使用 PascalCase
+interface UserProfile {
+  id: number
+  name: string
+}
+
+type UserStatus = 'active' | 'inactive'
+```
+
+### 导入导出规范
+
+#### 导入顺序
+```typescript
+// 1. Node.js 内置模块
+import path from 'node:path'
+import fs from 'node:fs'
+
+// 2. 第三方库
+import axios from 'axios'
+import { computed, ref } from 'vue'
+
+// 3. 内部模块（按路径深度排序）
+import { useUserStore } from '@/stores/user'
+import { formatDate } from '@/utils/date'
+
+// 4. 相对导入
+import UserCard from './UserCard.vue'
+import type { UserProps } from './types'
+
+// 5. 样式导入
+import './style.scss'
+```
+
+#### 导出规范
+```typescript
+// ✅ 推荐：命名导出
+export function formatDate(date: Date): string {
+  return date.toISOString()
+}
+
+export function parseDate(dateString: string): Date {
+  return new Date(dateString)
+}
+
+// ✅ 推荐：默认导出（用于主要功能）
+export default class DateUtils {
+  static format(date: Date): string {
+    return date.toISOString()
+  }
+}
+
+// ✅ 推荐：重新导出
+export { formatDate, parseDate } from './date'
+export type { DateFormat } from './types'
+```
+
+## 注释规范
+
+### JSDoc 注释
+```typescript
+/**
+ * 格式化日期为指定格式
+ * @param date - 要格式化的日期
+ * @param format - 日期格式，默认为 'YYYY-MM-DD'
+ * @returns 格式化后的日期字符串
+ * @example
+ * ```typescript
+ * formatDate(new Date(), 'YYYY-MM-DD HH:mm:ss')
+ * // '2024-01-01 12:00:00'
+ * ```
+ */
+export function formatDate(date: Date, format = 'YYYY-MM-DD'): string {
+  return date.toISOString()
+}
+```
+
+### Vue 组件注释
+```vue
+<script setup lang="ts">
+/**
+ * 用户信息卡片组件
+ * 用于显示用户的基本信息，包括头像、姓名和邮箱
+ */
+interface Props {
+  /** 用户信息对象 */
+  user: User
+  /** 是否显示详细信息 */
+  showDetails?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  showDetails: false,
+})
+</script>
+```
+
+### 复杂逻辑注释
+```typescript
+// 计算用户权限等级
+// 根据用户的角色和权限计算最终的权限等级
+function calculateUserLevel(user: User): UserLevel {
+  // 基础等级从用户角色获取
+  let level = user.role.level
+
+  // 如果是管理员，直接返回最高等级
+  if (user.role.name === 'admin') {
+    return UserLevel.ADMIN
+  }
+
+  // 根据用户积分调整等级
+  if (user.points > 1000) {
+    level = Math.max(level, UserLevel.VIP)
+  }
+
+  return level
+}
+```
+
+## 提交前检查
+
+### Lint-staged 配置
+项目配置了 `lint-staged`，位于 [package.json](mdc:package.json)：
+
+```json
+{
+  "lint-staged": {
+    "*.{ts,tsx,vue,js,json,md,yml}": "eslint --fix",
+    "*.{test,spec}.{ts,tsx,vue,js}": "eslint --fix"
+  }
+}
+```
+
+### 检查流程
+1. **代码检查**: `pnpm lint` 或 `pnpm lint:fix`
+2. **类型检查**: `pnpm type-check`
+3. **测试**: `pnpm test:run`
+
+### 规则处理
+- 对于新增 linter 报错，优先修复而非禁用规则
+- 如需例外，使用最小粒度的局部注释：
+  ```typescript
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = response.data
+  ```
+
+## 最佳实践
+
+### 代码质量
+- 遵循单一职责原则，每个函数只做一件事
+- 使用有意义的变量名和函数名
+- 避免深层嵌套，优先早返回
+- 保持函数简短，一般不超过 50 行
+
+### 性能考虑
+- 使用 `computed` 缓存计算结果
+- 避免在模板中进行复杂计算
+- 合理使用 `v-memo` 和 `v-once`
+- 使用 `defineAsyncComponent` 进行组件懒加载
+
+### 可维护性
+- 编写清晰的注释和文档
+- 使用 TypeScript 提供类型安全
+- 遵循一致的代码风格
+- 定期重构和优化代码

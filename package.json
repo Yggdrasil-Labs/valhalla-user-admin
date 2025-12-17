@@ -1,0 +1,117 @@
+{
+  "name": "asgard-frontend-template",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:test": "vite --mode test",
+    "build": "vite build",
+    "build:test": "vite build --mode test",
+    "preview": "vite preview",
+    "preview:test": "vite preview --mode test",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "lint": "eslint . --ext .ts,.vue,.json",
+    "lint:fix": "pnpm lint --fix",
+    "type-check": "vue-tsc --noEmit",
+    "dep:check": "pnpm dlx npm-check-updates",
+    "dep:update": "pnpm dlx npm-check-updates -u && pnpm install",
+    "release": "semantic-release",
+    "release:dry-run": "semantic-release --dry-run",
+    "release:ci": "pnpm run build && pnpm run release",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@vueuse/core": "^14.1.0",
+    "axios": "^1.13.2",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "vue": "^3.5.25",
+    "vue-i18n": "^11.2.2",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^6.7.1",
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@microsoft/eslint-formatter-sarif": "^3.1.0",
+    "@playwright/test": "^1.57.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.2",
+    "@semantic-release/npm": "^13.1.3",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@testing-library/vue": "^8.1.0",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.15",
+    "@vitest/ui": "^4.0.15",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.8.1",
+    "eslint": "^9.39.2",
+    "eslint-plugin-format": "^1.1.0",
+    "happy-dom": "^20.0.11",
+    "husky": "^9.1.7",
+    "jsdom": "^27.3.0",
+    "lint-staged": "^16.2.7",
+    "modern-normalize": "^3.0.1",
+    "sass": "^1.96.0",
+    "semantic-release": "^25.0.2",
+    "typescript": "~5.9.3",
+    "unplugin-auto-import": "^20.3.0",
+    "unplugin-vue-components": "^30.0.0",
+    "unplugin-vue-router": "^0.19.0",
+    "vite": "^7.2.7",
+    "vitest": "^4.0.15",
+    "vue-tsc": "^3.1.8"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,vue,js,json,md,yml}": "eslint --fix",
+    "*.{test,spec}.{ts,tsx,vue,js}": "eslint --fix"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      [
+        "@semantic-release/npm",
+        {
+          "npmPublish": false
+        }
+      ],
+      "@semantic-release/github",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "CHANGELOG.md",
+            "package.json"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+          "gitOptions": {
+            "signed": true
+          }
+        }
+      ]
+    ]
+  }
+}
