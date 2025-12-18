@@ -1,6 +1,7 @@
 import path from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
+import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
 import VueRouter from 'unplugin-vue-router/vite'
@@ -36,7 +37,9 @@ export default defineConfig(({ mode, command }) => {
         dts: 'src/types/components.d.ts',
         dirs: ['src/components'],
         // 自动导入组件
-        resolvers: [],
+        resolvers: [
+          NaiveUiResolver(),
+        ],
         // 包含的文件类型
         include: [/\.vue$/, /\.vue\?vue/],
         // 排除的文件
