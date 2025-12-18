@@ -8,7 +8,7 @@ import { vi } from 'vitest'
 // 模拟环境变量
 Object.defineProperty(import.meta, 'env', {
   value: {
-    VITE_APP_TITLE: 'Asgard Frontend Template',
+    VITE_APP_TITLE: 'Valhalla User Admin',
     VITE_API_BASE_URL: 'http://localhost:3000/api',
     DEV: true,
     PROD: false,

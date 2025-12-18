@@ -1,13 +1,13 @@
 <div align="center">
 
-# asgard-frontend-template
+# valhalla-user-admin
 
-[![CI](https://github.com/Yggdrasil-Labs/asgard-frontend-template/actions/workflows/ci.yml/badge.svg)](https://github.com/Yggdrasil-Labs/asgard-frontend-template/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/Yggdrasil-Labs/asgard-frontend-template/graph/badge.svg?token=8PGPHIE04N)](https://codecov.io/gh/Yggdrasil-Labs/asgard-frontend-template)
+[![CI](https://github.com/Yggdrasil-Labs/valhalla-user-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/Yggdrasil-Labs/valhalla-user-admin/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Yggdrasil-Labs/valhalla-user-admin/graph/badge.svg?token=8PGPHIE04N)](https://codecov.io/gh/Yggdrasil-Labs/valhalla-user-admin)
 
 </div>
 
-General frontend template. Asgard——kingdom of gods.
+Valhalla User Admin - 用户管理后台系统
 
 ## 📚 文档
 
@@ -27,7 +27,7 @@ General frontend template. Asgard——kingdom of gods.
 ## Project Structure
 
 ```
-asgard-frontend-template
+valhalla-user-admin
 ├── node_modules
 ├── public              # 静态资源（favicon、manifest 等）
 ├── src

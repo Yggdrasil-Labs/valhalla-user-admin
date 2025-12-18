@@ -56,7 +56,7 @@ export class HomePage extends BasePage {
    * 验证页面标题
    */
   async verifyPageTitle() {
-    await this.expectTitleToContain(/Asgard Frontend/)
+    await this.expectTitleToContain(/Valhalla User Admin/)
   }
 
   /**
@@ -64,7 +64,7 @@ export class HomePage extends BasePage {
    */
   async verifyNavbar() {
     await this.expectElementVisible(this.navbar)
-    await this.expectElementToContainText(this.navBrandTitle, 'Asgard Frontend')
+    await this.expectElementToContainText(this.navBrandTitle, 'Valhalla User Admin')
   }
 
   /**
@@ -72,7 +72,7 @@ export class HomePage extends BasePage {
    */
   async verifyHeroSection() {
     await this.expectElementToContainText(this.heroTitle, '欢迎来到')
-    await this.expectElementToContainText(this.gradientText, 'Asgard Frontend')
+    await this.expectElementToContainText(this.gradientText, 'Valhalla User Admin')
     await this.expectElementToContainText(this.heroSubtitle, '基于 Vue 3 + TypeScript + Vite 的现代化前端模板')
   }
 

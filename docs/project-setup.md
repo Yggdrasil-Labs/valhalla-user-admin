@@ -1,6 +1,6 @@
 # 项目设置
 
-本文档介绍了如何设置 Asgard Frontend Template 项目的开发环境。
+本文档介绍了如何设置 Valhalla User Admin 项目的开发环境。
 
 ## 📋 目录
 
@@ -31,7 +31,7 @@
 ```bash
 # 克隆项目到本地
 git clone <repository-url>
-cd asgard-frontend-template
+cd valhalla-user-admin
 ```
 
 ### 2. 安装依赖
@@ -74,7 +74,7 @@ pnpm dev
 
 ```bash
 # 应用配置
-VITE_APP_TITLE=Asgard Frontend Template
+VITE_APP_TITLE=Valhalla User Admin
 VITE_API_BASE_URL=http://localhost:8080
 VITE_PORT=5173
 VITE_HTTPS=false

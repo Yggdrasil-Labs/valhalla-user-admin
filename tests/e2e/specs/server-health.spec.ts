@@ -14,7 +14,7 @@ test.describe('服务器健康检查', () => {
     expect(response).toBeLessThan(400)
 
     // 检查页面标题
-    await serverHealthPage.expectTitleToContain(/Asgard Frontend/)
+    await serverHealthPage.expectTitleToContain(/Valhalla User Admin/)
 
     // 检查页面内容
     await serverHealthPage.expectElementVisible(serverHealthPage.getPage().locator('body'))

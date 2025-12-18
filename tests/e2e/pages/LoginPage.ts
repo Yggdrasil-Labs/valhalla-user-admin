@@ -46,7 +46,7 @@ export class LoginPage extends BasePage {
    * 验证页面标题
    */
   async verifyPageTitle() {
-    await this.expectTitleToContain(/Asgard Frontend/)
+    await this.expectTitleToContain(/Valhalla User Admin/)
   }
 
   /**

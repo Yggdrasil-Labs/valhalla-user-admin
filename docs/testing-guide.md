@@ -1,6 +1,6 @@
 # 测试指南
 
-本文档介绍了 Asgard Frontend Template 项目的测试策略、工具使用和最佳实践。
+本文档介绍了 Valhalla User Admin 项目的测试策略、工具使用和最佳实践。
 
 ## 📋 目录
 

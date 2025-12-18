@@ -1,6 +1,6 @@
 # 最佳实践
 
-本文档介绍了 Asgard Frontend Template 项目的性能优化、安全性和可维护性最佳实践。
+本文档介绍了 Valhalla User Admin 项目的性能优化、安全性和可维护性最佳实践。
 
 ## 📋 目录
 

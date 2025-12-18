@@ -42,3 +42,8 @@ src/types/typed-router.d.ts
 .env.*
 # 例外：保留模板文件
 !.env.example
+
+# OpenSpec
+.cursor/commands/
+openspec/*
+AGENTS.md

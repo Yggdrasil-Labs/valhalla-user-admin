@@ -54,7 +54,7 @@ function goToLogin() {
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-brand">
-          <h1>Asgard Frontend</h1>
+          <h1>Valhalla User Admin</h1>
         </div>
         <div class="nav-actions">
           <LanguageSwitcher />
@@ -77,7 +77,7 @@ function goToLogin() {
         <div class="hero-text">
           <h1 class="hero-title">
             <span class="hero-subtitle-small">欢迎来到</span>
-            <span class="gradient-text">Asgard Frontend</span>
+            <span class="gradient-text">Valhalla User Admin</span>
           </h1>
           <p class="hero-subtitle">
             基于 Vue 3 + TypeScript + Vite 的现代化前端模板

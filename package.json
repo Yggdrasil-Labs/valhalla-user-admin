@@ -1,7 +1,7 @@
 {
-  "name": "asgard-frontend-template",
+  "name": "valhalla-user-admin",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@10.26.0",
   "engines": {

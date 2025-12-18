@@ -1,11 +1,11 @@
 # 开发指南
 
-本指南将帮助您快速了解 Asgard Frontend Template 的项目结构、技术栈和开发流程。
+本指南将帮助您快速了解 Valhalla User Admin 的项目结构、技术栈和开发流程。
 
 ## 📁 项目结构
 
 ```
-asgard-frontend-template/
+valhalla-user-admin/
 ├── public/                 # 静态资源目录
 ├── src/                   # 源代码目录
 │   ├── api/               # API 接口层
@@ -79,7 +79,7 @@ asgard-frontend-template/
 ```bash
 # 克隆项目
 git clone <repository-url>
-cd asgard-frontend-template
+cd valhalla-user-admin
 
 # 安装依赖
 pnpm install

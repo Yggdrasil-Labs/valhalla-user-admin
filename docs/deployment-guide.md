@@ -1,6 +1,6 @@
 # 部署指南
 
-本文档介绍了 Asgard Frontend Template 项目的构建、部署和 CI/CD 流程。
+本文档介绍了 Valhalla User Admin 项目的构建、部署和 CI/CD 流程。
 
 ## 📋 目录
 
@@ -67,18 +67,18 @@ export default defineConfig(({ mode, command }) => {
 
 ```bash
 # .env.local (本地开发)
-VITE_APP_TITLE=Asgard Frontend Template
+VITE_APP_TITLE=Valhalla User Admin
 VITE_API_BASE_URL=http://localhost:8080
 VITE_PORT=5173
 VITE_HTTPS=false
 
 # .env.test (测试环境)
-VITE_APP_TITLE=Asgard Frontend Template (Test)
+VITE_APP_TITLE=Valhalla User Admin (Test)
 VITE_API_BASE_URL=https://api-test.example.com
 VITE_CDN_URL=https://cdn-test.example.com
 
 # .env.production (生产环境)
-VITE_APP_TITLE=Asgard Frontend Template
+VITE_APP_TITLE=Valhalla User Admin
 VITE_API_BASE_URL=https://api.example.com
 VITE_CDN_URL=https://cdn.example.com
 VITE_ANALYTICS_ID=GA-XXXXXXXXX
@@ -167,7 +167,7 @@ pnpm preview
 server {
     listen 80;
     server_name example.com;
-    root /var/www/asgard-frontend/dist;
+    root /var/www/valhalla-user-admin/dist;
     index index.html;
 
     # Gzip 压缩
@@ -341,7 +341,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /var/www/asgard-frontend
+            cd /var/www/valhalla-user-admin
             git pull origin main
             pnpm install
             pnpm build
@@ -401,7 +401,7 @@ deploy:
     - chmod 700 ~/.ssh
     - ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
   script:
-    - scp -r dist/* $SERVER_USER@$SERVER_HOST:/var/www/asgard-frontend/
+    - scp -r dist/* $SERVER_USER@$SERVER_HOST:/var/www/valhalla-user-admin/
     - ssh $SERVER_USER@$SERVER_HOST "sudo systemctl reload nginx"
   only:
     - main

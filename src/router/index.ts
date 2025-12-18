@@ -64,7 +64,7 @@ router.beforeEach(async (to, from, next) => {
 router.afterEach((to) => {
   // 更新页面标题
   if (to.meta.title) {
-    document.title = `${to.meta.title} - Asgard Frontend`
+    document.title = `${to.meta.title} - Valhalla User Admin`
   }
 })
 
