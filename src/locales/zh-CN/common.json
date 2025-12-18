@@ -130,8 +130,6 @@
     "terms": "服务条款"
   },
   "user": {
-    "login": "登录",
-    "logout": "退出登录",
     "register": "注册",
     "profile": "个人资料",
     "account": "账户设置",

@@ -26,9 +26,12 @@ export async function resetStores() {
   const { useUserStore } = await import('./index')
 
   // 重置所有 Store
-  await Promise.all([
-    useUserStore().logout(),
-  ])
+  const userStore = useUserStore()
+  userStore.$patch({
+    userInfo: null,
+    loading: false,
+    error: null,
+  })
 }
 
 // 默认导出

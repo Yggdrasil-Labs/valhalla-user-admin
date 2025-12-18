@@ -130,8 +130,6 @@
     "terms": "Terms of Service"
   },
   "user": {
-    "login": "Login",
-    "logout": "Logout",
     "register": "Register",
     "profile": "Profile",
     "account": "Account Settings",

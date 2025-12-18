@@ -18,14 +18,6 @@ export class ServerHealthPage extends BasePage {
   }
 
   /**
-   * 检查登录页面可访问性
-   */
-  async checkLoginPageAccess() {
-    const response = await this.getResponseStatus('/login')
-    return response
-  }
-
-  /**
    * 获取页面对象（用于访问页面元素）
    */
   getPage() {

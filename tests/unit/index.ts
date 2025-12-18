@@ -4,7 +4,6 @@
  */
 
 // 组件测试
-export * from './components/HelloWorld.test'
 export * from './components/LanguageSwitcher.test'
 // Composable 测试
 export * from './composables/useI18n.test'

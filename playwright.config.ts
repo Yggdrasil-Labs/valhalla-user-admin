@@ -1,27 +1,5 @@
-import { existsSync } from 'node:fs'
 import process from 'node:process'
 import { defineConfig, devices } from '@playwright/test'
-
-/**
- * 安全获取storageState配置
- * 如果文件不存在且不是setup项目，则返回undefined
- */
-function getStorageState(projectName: string): string | undefined {
-  const storageStatePath = 'storageState.json'
-
-  // Setup项目不需要storageState
-  if (projectName === 'setup') {
-    return undefined
-  }
-
-  // 如果文件不存在，返回undefined（让Playwright处理）
-  if (!existsSync(storageStatePath)) {
-    console.warn(`警告: ${storageStatePath} 文件不存在，项目 ${projectName} 将不使用认证状态`)
-    return undefined
-  }
-
-  return storageStatePath
-}
 
 /**
  * Playwright 配置文件
@@ -79,44 +57,32 @@ export default defineConfig({
 
   // 项目配置 - 测试不同的浏览器
   projects: [
-    // Setup project for authentication
+    // Setup project
     {
       name: 'setup',
       testMatch: /.*setup\/e2e\.ts/,
     },
-    // Authenticated tests
+    // Chromium tests
     {
-      name: 'authenticated-chromium',
+      name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: getStorageState('authenticated-chromium'),
       },
       dependencies: ['setup'],
     },
+    // Firefox tests
     {
-      name: 'authenticated-firefox',
+      name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        storageState: getStorageState('authenticated-firefox'),
       },
       dependencies: ['setup'],
-    },
-    // Unauthenticated tests (login page tests)
-    {
-      name: 'unauthenticated-chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // 确保不使用任何存储状态，以测试未认证场景
-        storageState: undefined,
-      },
-      testMatch: /.*login.*\.spec\.ts/,
     },
     // Mobile tests
     {
       name: 'Mobile Chrome',
       use: {
         ...devices['Pixel 5'],
-        storageState: getStorageState('Mobile Chrome'),
       },
       dependencies: ['setup'],
     },
@@ -124,7 +90,6 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: {
         ...devices['iPhone 12'],
-        storageState: getStorageState('Mobile Safari'),
       },
       dependencies: ['setup'],
     },

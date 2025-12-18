@@ -3,9 +3,7 @@ import { expect, test } from '@playwright/test'
 
 // 配置常量
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173'
-const LOGIN_URL = `${BASE_URL}/login`
-const USERNAME = process.env.TEST_USERNAME || 'demo'
-const PASSWORD = process.env.TEST_PASSWORD || 'password'
+const HOME_URL = `${BASE_URL}/`
 const STORAGE_STATE_PATH = process.env.STORAGE_STATE_PATH || 'storageState.json'
 const MAX_RETRIES = 3
 const RETRY_DELAY = 2000
@@ -30,59 +28,38 @@ async function waitForServerReady(page: any, url: string, maxAttempts = 10) {
   return false
 }
 
-// 登录辅助函数
-async function performLogin(page: any) {
-  // 等待登录页面加载
-  await page.waitForLoadState('networkidle')
-
-  // 确保在登录页面
-  await expect(page).toHaveURL(/\/login/)
-
-  // 填写登录信息
-  await page.fill('#username', USERNAME)
-  await page.fill('#password', PASSWORD)
-
-  // 点击登录按钮
-  await page.click('.login-button')
-
-  // 等待登录处理完成
-  await page.waitForLoadState('networkidle')
-
-  // 验证登录成功
-  await expect(page).toHaveURL(/\/$/)
-
-  // 额外验证：检查是否真的登录成功
-  await expect(page.locator('.navbar')).toBeVisible()
-}
-
-test('auth setup', async ({ page }) => {
-  console.log('开始认证设置...')
+test('setup', async ({ page }) => {
+  console.log('开始设置...')
 
   // 重试机制
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      console.log(`认证尝试 ${attempt}/${MAX_RETRIES}`)
+      console.log(`设置尝试 ${attempt}/${MAX_RETRIES}`)
 
       // 等待服务器就绪
-      const serverReady = await waitForServerReady(page, LOGIN_URL)
+      const serverReady = await waitForServerReady(page, HOME_URL)
       if (!serverReady) {
         throw new Error('服务器未就绪')
       }
 
-      // 执行登录
-      await performLogin(page)
+      // 等待页面加载
+      await page.waitForLoadState('networkidle')
 
-      // 保存登录状态
+      // 验证页面加载成功
+      await expect(page).toHaveURL(/\/$/)
+      await expect(page.locator('.navbar')).toBeVisible()
+
+      // 保存状态（如果需要）
       await page.context().storageState({ path: STORAGE_STATE_PATH })
 
-      console.log('认证设置成功')
+      console.log('设置成功')
       return
     }
     catch (error: any) {
-      console.error(`认证尝试 ${attempt} 失败:`, error.message)
+      console.error(`设置尝试 ${attempt} 失败:`, error.message)
 
       if (attempt === MAX_RETRIES) {
-        throw new Error(`认证设置失败，已重试 ${MAX_RETRIES} 次: ${error.message}`)
+        throw new Error(`设置失败，已重试 ${MAX_RETRIES} 次: ${error.message}`)
       }
 
       // 等待后重试

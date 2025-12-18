@@ -17,26 +17,16 @@ export function useUser() {
     loading: computed(() => userStore.loading),
     error: computed(() => userStore.error),
     userInfo: computed(() => userStore.userInfo),
-    isLoggedIn: computed(() => userStore.isLoggedIn),
-    token: computed(() => userStore.token),
-    loginTime: computed(() => userStore.loginTime),
-    lastActivity: computed(() => userStore.lastActivity),
 
     // 计算属性
     displayName: computed(() => userStore.displayName),
     avatar: computed(() => userStore.avatar),
     roles: computed(() => userStore.roles),
     permissions: computed(() => userStore.permissions),
-    sessionDuration: computed(() => userStore.sessionDuration),
-    isInactive: computed(() => userStore.isInactive),
 
     // 方法
-    login: (loginInfo: any) => userStore.login(loginInfo),
-    logout: () => userStore.logout(),
     fetchUserInfo: () => userStore.fetchUserInfo(),
     updateUserInfo: (userInfo: any) => userStore.updateUserInfo(userInfo),
-    refreshToken: () => userStore.refreshToken(),
-    updateActivity: () => userStore.updateActivity(),
     hasRole: (role: string) => userStore.hasRole(role),
     hasPermission: (permission: string) => userStore.hasPermission(permission),
     canAccess: (permission: string) => userStore.hasPermission(permission),

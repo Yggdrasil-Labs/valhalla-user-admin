@@ -31,12 +31,12 @@ export const mockSystemGuide = {
       import { apiMocks, storeMocks } from '@/tests/mocks'
       
       // 设置 Mock
-      apiMocks.user.login.mockResolvedValue(mockResponse)
+      apiMocks.user.getUserInfo.mockResolvedValue(mockResponse)
       
       // 测试代码...
       
       // 清理
-      apiMocks.user.login.mockReset()
+      apiMocks.user.getUserInfo.mockReset()
     `,
   },
 

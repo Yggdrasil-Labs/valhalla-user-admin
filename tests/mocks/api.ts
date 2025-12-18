@@ -9,28 +9,6 @@ import { vi } from 'vitest'
  * 用户 API Mock
  */
 export const userApiMocks = {
-  login: vi.fn().mockResolvedValue({
-    code: 200,
-    message: '登录成功',
-    data: {
-      user: {
-        id: 1,
-        username: 'testUser',
-        email: 'test@example.com',
-        avatar: '/avatar.jpg',
-        roles: ['user'],
-        permissions: ['read'],
-      },
-      token: 'mock-jwt-token',
-    },
-  }),
-
-  logout: vi.fn().mockResolvedValue({
-    code: 200,
-    message: '登出成功',
-    data: null,
-  }),
-
   getUserInfo: vi.fn().mockResolvedValue({
     code: 200,
     message: '获取用户信息成功',
@@ -41,6 +19,8 @@ export const userApiMocks = {
       avatar: '/avatar.jpg',
       roles: ['user'],
       permissions: ['read'],
+      createdAt: '2023-01-01',
+      updatedAt: '2023-01-01',
     },
   }),
 
@@ -54,14 +34,8 @@ export const userApiMocks = {
       avatar: '/avatar.jpg',
       roles: ['user'],
       permissions: ['read'],
-    },
-  }),
-
-  refreshToken: vi.fn().mockResolvedValue({
-    code: 200,
-    message: '刷新令牌成功',
-    data: {
-      token: 'new-mock-jwt-token',
+      createdAt: '2023-01-01',
+      updatedAt: '2023-01-01',
     },
   }),
 }

@@ -76,11 +76,6 @@ export const testDataFactory = {
     updatedAt: '2023-01-01T00:00:00Z',
     ...overrides,
   }),
-  createLoginData: (overrides: Record<string, any> = {}) => ({
-    username: 'testUser',
-    password: 'password123',
-    ...overrides,
-  }),
   createApiResponse: (data: any, message = 'success', code = 200) => ({ code, message, data }),
   createErrorResponse: (message = 'error', code = 400) => ({ code, message, data: null }),
 }

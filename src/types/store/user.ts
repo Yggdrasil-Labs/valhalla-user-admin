@@ -13,10 +13,3 @@ export interface UserInfo {
   createdAt: string
   updatedAt: string
 }
-
-// 用户登录信息
-export interface LoginInfo {
-  username: string
-  password: string
-  remember?: boolean
-}

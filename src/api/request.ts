@@ -74,9 +74,7 @@ request.interceptors.response.use(
 
       switch (status) {
         case 401:
-          errorMessage = '未授权，请重新登录'
-          // 可以在这里添加跳转到登录页的逻辑
-          // router.push('/login')
+          errorMessage = '未授权'
           break
         case 403:
           errorMessage = '拒绝访问'

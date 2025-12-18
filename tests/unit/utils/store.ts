@@ -51,15 +51,6 @@ export const storeTestUtils = {
   }),
 
   /**
-   * 创建登录信息
-   */
-  createLoginData: (overrides: Record<string, any> = {}) => ({
-    username: 'testUser',
-    password: 'password123',
-    ...overrides,
-  }),
-
-  /**
    * 验证 Store 状态
    */
   expectStoreState: (store: any, expectedState: Record<string, any>) => {
@@ -116,12 +107,4 @@ export const storeDataFactory = {
       }))
   },
 
-  /**
-   * 创建登录信息
-   */
-  createLoginInfo: (overrides: Record<string, any> = {}) => ({
-    username: `user${Math.random().toString(36).substring(2, 8)}`,
-    password: 'password123',
-    ...overrides,
-  }),
 }

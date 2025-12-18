@@ -43,15 +43,8 @@ export const HTTP_STATUS = {
 } as const
 
 export const API_ENDPOINTS = {
-  AUTH: {
-    LOGIN: '/api/auth/login',
-    LOGOUT: '/api/auth/logout',
-    REFRESH: '/api/auth/refresh',
-    REGISTER: '/api/auth/register',
-  },
   USER: {
-    PROFILE: '/api/user/profile',
-    UPDATE: '/api/user/update',
-    DELETE: '/api/user/delete',
+    INFO: '/api/user/info',
+    UPDATE: '/api/user/info',
   },
 } as const
