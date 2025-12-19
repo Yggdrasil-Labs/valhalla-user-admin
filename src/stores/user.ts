@@ -73,7 +73,7 @@ export const useUserStore = defineStore('user', {
       try {
         const response = await getUserInfoApi()
 
-        if (response.code === 200) {
+        if (response.success && response.data) {
           this.userInfo = response.data
 
           return {
@@ -83,7 +83,7 @@ export const useUserStore = defineStore('user', {
           }
         }
         else {
-          throw new Error(response.message || '获取用户信息失败')
+          throw new Error(response.errMessage || '获取用户信息失败')
         }
       }
       catch (error) {
@@ -112,7 +112,7 @@ export const useUserStore = defineStore('user', {
       try {
         const response = await updateUserInfoApi(userInfo)
 
-        if (response.code === 200) {
+        if (response.success && response.data) {
           this.userInfo = { ...this.userInfo, ...response.data }
 
           return {
@@ -122,7 +122,7 @@ export const useUserStore = defineStore('user', {
           }
         }
         else {
-          throw new Error(response.message || '更新用户信息失败')
+          throw new Error(response.errMessage || '更新用户信息失败')
         }
       }
       catch (error) {

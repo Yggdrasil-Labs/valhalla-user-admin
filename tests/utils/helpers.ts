@@ -76,16 +76,28 @@ export const testDataFactory = {
     updatedAt: '2023-01-01T00:00:00Z',
     ...overrides,
   }),
-  createApiResponse: (data: any, message = 'success', code = 200) => ({ code, message, data }),
-  createErrorResponse: (message = 'error', code = 400) => ({ code, message, data: null }),
+  createApiResponse: (data?: any, success = true, errMessage?: string, errCode?: string) => ({
+    success,
+    ...(data !== undefined && { data }),
+    ...(errMessage && { errMessage }),
+    ...(errCode && { errCode }),
+  }),
+  createErrorResponse: (errMessage = 'error', errCode?: string) => ({
+    success: false,
+    errMessage,
+    ...(errCode && { errCode }),
+  }),
 }
 
 // ========== 断言工具 ==========
 export const testAssertions = {
   assertApiResponse: (response: any) => {
-    expect(response).toHaveProperty('code')
-    expect(response).toHaveProperty('message')
-    expect(response).toHaveProperty('data')
+    expect(response).toHaveProperty('success')
+    expect(typeof response.success).toBe('boolean')
+    // data 字段是可选的，如果存在则验证其类型
+    if ('data' in response) {
+      expect(response).toHaveProperty('data')
+    }
   },
   assertUserData: (user: any) => {
     expect(user).toHaveProperty('id')

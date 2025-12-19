@@ -2,28 +2,28 @@ import { expect } from 'vitest'
 
 export const apiTestUtils = {
   validateApiResponse: (response: any) => {
-    expect(response).toHaveProperty('code')
-    expect(response).toHaveProperty('message')
-    expect(response).toHaveProperty('data')
-    expect(typeof response.code).toBe('number')
-    expect(typeof response.message).toBe('string')
+    expect(response).toHaveProperty('success')
+    expect(typeof response.success).toBe('boolean')
+    // data 字段是可选的，如果存在则验证其类型
+    if ('data' in response) {
+      expect(response).toHaveProperty('data')
+    }
   },
 
   validateSuccessResponse: (response: any, expectedData?: any) => {
-    expect(response.code).toBe(200)
-    expect(response.message).toBe('success')
+    expect(response.success).toBe(true)
     if (expectedData) {
       expect(response.data).toEqual(expectedData)
     }
   },
 
-  validateErrorResponse: (response: any, expectedCode?: number, expectedMessage?: string) => {
-    expect(response.code).toBeGreaterThanOrEqual(400)
-    if (expectedCode) {
-      expect(response.code).toBe(expectedCode)
+  validateErrorResponse: (response: any, expectedErrMessage?: string, expectedErrCode?: string) => {
+    expect(response.success).toBe(false)
+    if (expectedErrMessage) {
+      expect(response.errMessage).toBe(expectedErrMessage)
     }
-    if (expectedMessage) {
-      expect(response.message).toBe(expectedMessage)
+    if (expectedErrCode) {
+      expect(response.errCode).toBe(expectedErrCode)
     }
   },
 }

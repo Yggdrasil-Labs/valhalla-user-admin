@@ -40,8 +40,13 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
-    const { data } = response
+  (response: AxiosResponse<ApiResponse | Blob>) => {
+    // 如果是文件下载（blob 类型），直接返回原始响应
+    if (response.config.responseType === 'blob') {
+      return response as AxiosResponse<Blob>
+    }
+
+    const { data } = response as AxiosResponse<ApiResponse>
 
     console.log('响应接收:', {
       url: response.config.url,
@@ -50,12 +55,13 @@ request.interceptors.response.use(
     })
 
     // 统一处理响应数据
-    if (data.code === 200 || data.success === true) {
-      return response
+    if (data.success === true) {
+      // 只返回接口数据，不返回 HTTP 状态码和 URL 等信息
+      return data as any
     }
     else {
       // 业务错误处理
-      const errorMessage = data.message || '请求失败'
+      const errorMessage = data.errMessage || '请求失败'
       console.error('业务错误:', errorMessage)
 
       // 可以在这里添加全局错误提示

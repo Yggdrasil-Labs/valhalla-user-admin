@@ -137,7 +137,55 @@
     "notifications": "Notifications",
     "messages": "Messages",
     "security": "Security Settings",
-    "privacy": "Privacy Settings"
+    "privacy": "Privacy Settings",
+    "management": {
+      "title": "User Management",
+      "description": "Manage system users",
+      "addUser": "Add User",
+      "editUser": "Edit User",
+      "deleteUser": "Delete User",
+      "enableUser": "Enable User",
+      "disableUser": "Disable User",
+      "columns": {
+        "id": "ID",
+        "username": "Username",
+        "email": "Email",
+        "phone": "Phone",
+        "nickname": "Nickname",
+        "status": "Status",
+        "createTime": "Create Time",
+        "updateTime": "Update Time",
+        "actions": "Actions"
+      },
+      "form": {
+        "username": "Username",
+        "email": "Email",
+        "phone": "Phone",
+        "nickname": "Nickname",
+        "avatar": "Avatar URL",
+        "status": "Status"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "messages": {
+        "createSuccess": "User created successfully",
+        "createFailed": "Failed to create user",
+        "updateSuccess": "User updated successfully",
+        "updateFailed": "Failed to update user",
+        "deleteSuccess": "User deleted successfully",
+        "deleteFailed": "Failed to delete user",
+        "statusChangeSuccess": "Status updated successfully",
+        "statusChangeFailed": "Failed to update status",
+        "loadFailed": "Failed to load user list"
+      },
+      "confirm": {
+        "deleteUser": "Are you sure you want to delete user {username}?",
+        "disableUser": "Are you sure you want to disable user {username}?",
+        "enableUser": "Are you sure you want to enable user {username}?"
+      }
+    }
   },
   "time": {
     "now": "Now",

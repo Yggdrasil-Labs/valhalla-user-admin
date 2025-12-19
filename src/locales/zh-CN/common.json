@@ -137,7 +137,55 @@
     "notifications": "通知",
     "messages": "消息",
     "security": "安全设置",
-    "privacy": "隐私设置"
+    "privacy": "隐私设置",
+    "management": {
+      "title": "用户管理",
+      "description": "管理系统用户",
+      "addUser": "新增用户",
+      "editUser": "编辑用户",
+      "deleteUser": "删除用户",
+      "enableUser": "启用用户",
+      "disableUser": "禁用用户",
+      "columns": {
+        "id": "ID",
+        "username": "用户名",
+        "email": "邮箱",
+        "phone": "手机号",
+        "nickname": "昵称",
+        "status": "状态",
+        "createTime": "创建时间",
+        "updateTime": "更新时间",
+        "actions": "操作"
+      },
+      "form": {
+        "username": "用户名",
+        "email": "邮箱",
+        "phone": "手机号",
+        "nickname": "昵称",
+        "avatar": "头像URL",
+        "status": "状态"
+      },
+      "status": {
+        "enabled": "启用",
+        "disabled": "禁用"
+      },
+      "messages": {
+        "createSuccess": "创建用户成功",
+        "createFailed": "创建用户失败",
+        "updateSuccess": "更新用户成功",
+        "updateFailed": "更新用户失败",
+        "deleteSuccess": "删除用户成功",
+        "deleteFailed": "删除用户失败",
+        "statusChangeSuccess": "状态更新成功",
+        "statusChangeFailed": "状态更新失败",
+        "loadFailed": "加载用户列表失败"
+      },
+      "confirm": {
+        "deleteUser": "确定要删除用户 {username} 吗？",
+        "disableUser": "确定要禁用用户 {username} 吗？",
+        "enableUser": "确定要启用用户 {username} 吗？"
+      }
+    }
   },
   "time": {
     "now": "现在",

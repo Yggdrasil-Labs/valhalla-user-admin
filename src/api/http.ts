@@ -139,14 +139,14 @@ class Http {
       ...config,
     }).then((response) => {
       const blob = new Blob([response.data])
-      const downloadUrl = window.URL.createObjectURL(blob)
+      const downloadUrl = globalThis.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = downloadUrl
       link.download = filename || 'download'
       document.body.appendChild(link)
       link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(downloadUrl)
+      link.remove()
+      globalThis.URL.revokeObjectURL(downloadUrl)
     })
   }
 
@@ -183,4 +183,4 @@ export default http
 export { Http }
 
 // 导出类型
-export type { ApiResponse }
+export type { ApiResponse } from '@/types/api'

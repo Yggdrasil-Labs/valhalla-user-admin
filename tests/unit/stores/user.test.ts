@@ -99,8 +99,7 @@ describe('useUserStore', () => {
       }
 
       ;(getUserInfoApi as any).mockResolvedValue({
-        code: 200,
-        message: '获取用户信息成功',
+        success: true,
         data: mockUserInfo,
       })
 
@@ -114,9 +113,8 @@ describe('useUserStore', () => {
     it('应该处理获取用户信息失败', async () => {
       const { getUserInfoApi } = await import('@/api/modules/user')
       ;(getUserInfoApi as any).mockResolvedValue({
-        code: 500,
-        message: '获取用户信息失败',
-        data: null,
+        success: false,
+        errMessage: '获取用户信息失败',
       })
 
       const result = await store.fetchUserInfo()
@@ -149,8 +147,7 @@ describe('useUserStore', () => {
       }
 
       ;(updateUserInfoApi as any).mockResolvedValue({
-        code: 200,
-        message: '更新用户信息成功',
+        success: true,
         data: {
           ...store.userInfo,
           ...updatedInfo,

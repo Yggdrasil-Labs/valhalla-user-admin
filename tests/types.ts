@@ -33,20 +33,24 @@ export interface TestMountOptions {
 
 /**
  * API 响应类型
+ * 符合 cola5.0 标准返回结果格式
+ * data 字段可能不存在，可能是对象，可能是数组
  */
 export interface ApiResponse<T = any> {
-  code: number
-  message: string
-  data: T
+  success: boolean
+  errCode?: string
+  errMessage?: string
+  data?: T
 }
 
 /**
  * API 错误响应类型
  */
 export interface ApiErrorResponse {
-  code: number
-  message: string
-  data: null
+  success: false
+  errCode?: string
+  errMessage?: string
+  data?: null
 }
 
 /**

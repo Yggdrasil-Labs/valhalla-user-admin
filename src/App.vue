@@ -2,9 +2,15 @@
 </script>
 
 <template>
-  <div class="app">
-    <RouterView />
-  </div>
+  <n-config-provider>
+    <n-message-provider>
+      <n-dialog-provider>
+        <div class="app">
+          <RouterView />
+        </div>
+      </n-dialog-provider>
+    </n-message-provider>
+  </n-config-provider>
 </template>
 
 <style lang="scss" scoped>
