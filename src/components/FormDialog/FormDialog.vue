@@ -140,18 +140,25 @@ function handleCancel() {
 <template>
   <n-modal
     v-model:show="dialogVisible"
-    :title="title"
     :width="width"
     preset="dialog"
     :mask-closable="false"
     :close-on-esc="true"
+    :show-icon="false"
   >
+    <template #header>
+      <div class="dialog-title">
+        {{ title }}
+      </div>
+    </template>
+
     <n-form
       ref="formRef"
       :model="formData"
       :rules="formRules"
       label-placement="left"
       label-width="100px"
+      class="dialog-form"
     >
       <template v-for="field in fields" :key="field.key">
         <n-form-item
@@ -216,5 +223,35 @@ function handleCancel() {
 </template>
 
 <style scoped lang="scss">
-// 表单样式由 Naive UI 提供
+:deep(.n-modal) {
+  .n-card {
+    border-radius: 12px !important;
+    overflow: hidden;
+  }
+
+  .n-card__content {
+    border-radius: 12px;
+  }
+
+  .n-card__header {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .n-card__footer {
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+.dialog-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  width: 100%;
+}
+
+.dialog-form {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
 </style>

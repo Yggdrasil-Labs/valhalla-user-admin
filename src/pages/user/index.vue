@@ -496,15 +496,6 @@ onMounted(() => {
     </div>
 
     <div class="page-content">
-      <div class="toolbar">
-        <NButton
-          type="primary"
-          @click="handleAdd"
-        >
-          {{ t('user.management.addUser') }}
-        </NButton>
-      </div>
-
       <DataTable
         :columns="columns"
         :data="users"
@@ -518,10 +509,20 @@ onMounted(() => {
         :filter-value="filterValue"
         :sort-state="sortState"
         :error="error"
+        :filter-width="200"
         @search="handleSearch"
         @filter="handleFilter"
         @update:sorter="handleSorterChange"
-      />
+      >
+        <template #toolbar>
+          <NButton
+            type="primary"
+            @click="handleAdd"
+          >
+            {{ t('user.management.addUser') }}
+          </NButton>
+        </template>
+      </DataTable>
     </div>
 
     <!-- 表单对话框 -->
@@ -566,12 +567,6 @@ onMounted(() => {
   border-radius: 8px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.toolbar {
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: flex-end;
 }
 
 .action-buttons {

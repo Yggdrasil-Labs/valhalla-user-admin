@@ -46,6 +46,12 @@ interface Props {
   striped?: boolean
   /** 错误信息 */
   error?: string | null
+  /** 是否启用列宽调整 */
+  resizable?: boolean
+  /** 搜索和筛选框宽度 */
+  filterWidth?: string | number
+  /** 表格高度，支持数字（px）或 'auto' */
+  height?: number | 'auto'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -60,6 +66,9 @@ const props = withDefaults(defineProps<Props>(), {
   bordered: true,
   striped: false,
   error: null,
+  resizable: true,
+  filterWidth: 200,
+  height: 600,
 })
 
 const emit = defineEmits<{
@@ -102,56 +111,88 @@ const sortStateModel = computed({
 function handleSorterChange(sorter: SortState) {
   sortStateModel.value = sorter
 }
+
+// 处理列宽调整
+const resizableColumns = computed(() => {
+  if (!props.resizable) {
+    return props.columns
+  }
+  return props.columns.map((column) => {
+    // 如果列已经有 resizable 属性，保持原样
+    if ('resizable' in column && column.resizable !== undefined) {
+      return column
+    }
+    // 否则默认启用 resizable
+    return {
+      ...column,
+      resizable: true,
+    }
+  })
+})
 </script>
 
 <template>
   <div class="data-table-wrapper">
-    <!-- 搜索和筛选栏 -->
-    <div v-if="searchable || filterable" class="data-table-toolbar">
-      <!-- 搜索框 -->
-      <div v-if="searchable" class="search-box">
-        <n-input
-          v-model:value="searchValueModel"
-          :placeholder="searchPlaceholder || t('button.search')"
-          clearable
-        />
+    <!-- 整体容器：包含 toolbar 和表格 -->
+    <div class="data-table-container">
+      <!-- 搜索和筛选栏 -->
+      <div v-if="searchable || filterable || $slots.toolbar" class="data-table-toolbar">
+        <div class="toolbar-left">
+          <!-- 搜索框 -->
+          <div v-if="searchable" class="search-box">
+            <n-input
+              v-model:value="searchValueModel"
+              :placeholder="searchPlaceholder || t('button.search')"
+              clearable
+              :style="{ width: typeof filterWidth === 'number' ? `${filterWidth}px` : filterWidth }"
+            />
+          </div>
+
+          <!-- 筛选器 -->
+          <div v-if="filterable && filterOptions" class="filter-box">
+            <n-select
+              v-model:value="filterValueModel"
+              :options="filterOptions"
+              :placeholder="t('button.filter')"
+              clearable
+              :style="{ width: typeof filterWidth === 'number' ? `${filterWidth}px` : filterWidth }"
+            />
+          </div>
+        </div>
+
+        <!-- 右侧操作按钮插槽 -->
+        <div v-if="$slots.toolbar" class="toolbar-right">
+          <slot name="toolbar" />
+        </div>
       </div>
 
-      <!-- 筛选器 -->
-      <div v-if="filterable && filterOptions" class="filter-box">
-        <n-select
-          v-model:value="filterValueModel"
-          :options="filterOptions"
-          :placeholder="t('button.filter')"
-          clearable
-          style="width: 200px"
+      <!-- 错误提示 -->
+      <div v-if="error" class="error-alert">
+        <n-alert
+          type="error"
+          :title="t('status.error')"
+        >
+          {{ error }}
+        </n-alert>
+      </div>
+
+      <!-- 数据表格 -->
+      <div class="data-table-content">
+        <n-data-table
+          :columns="resizableColumns"
+          :data="data"
+          :loading="loading"
+          :pagination="pagination"
+          :bordered="bordered"
+          :striped="striped"
+          :sort="sortStateModel"
+          :sort-mode="sortMode"
+          :remote="false"
+          :max-height="height === 'auto' ? undefined : height"
+          @update:sorter="handleSorterChange"
         />
       </div>
     </div>
-
-    <!-- 错误提示 -->
-    <n-alert
-      v-if="error"
-      type="error"
-      :title="t('status.error')"
-      style="margin-bottom: 16px"
-    >
-      {{ error }}
-    </n-alert>
-
-    <!-- 数据表格 -->
-    <n-data-table
-      :columns="columns"
-      :data="data"
-      :loading="loading"
-      :pagination="pagination"
-      :bordered="bordered"
-      :striped="striped"
-      :sort="sortStateModel"
-      :sort-mode="sortMode"
-      :remote="false"
-      @update:sorter="handleSorterChange"
-    />
   </div>
 </template>
 
@@ -160,19 +201,92 @@ function handleSorterChange(sorter: SortState) {
   width: 100%;
 }
 
-.data-table-toolbar {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  align-items: center;
+.data-table-container {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+  padding: 16px;
 
-  .search-box {
-    flex: 1;
-    max-width: 300px;
+  &:hover {
+    box-shadow:
+      0 6px 24px rgba(0, 0, 0, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
-  .filter-box {
-    flex-shrink: 0;
+  .data-table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 0;
+
+    .toolbar-left {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .toolbar-right {
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      flex-shrink: 0;
+    }
+
+    .filter-box {
+      flex-shrink: 0;
+    }
+  }
+
+  .error-alert {
+    margin-bottom: 16px;
+  }
+
+  .data-table-content {
+    :deep(.n-data-table) {
+      background: transparent;
+    }
+
+    :deep(.n-data-table-wrapper) {
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    :deep(.n-data-table-thead) {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    :deep(.n-data-table-tbody) {
+      background: transparent;
+    }
+
+    :deep(.n-data-table-td) {
+      background: transparent;
+      border-color: rgba(0, 0, 0, 0.06);
+    }
+
+    :deep(.n-data-table-th) {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-color: rgba(0, 0, 0, 0.06);
+    }
+
+    :deep(.n-data-table-tr:hover .n-data-table-td) {
+      background: rgba(0, 0, 0, 0.02);
+    }
   }
 }
 </style>
