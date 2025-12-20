@@ -2,6 +2,8 @@
 import type { DataTableColumns, DataTableSortState } from 'naive-ui'
 import { useI18nHelper } from '@/composables/useI18n'
 
+type SortState = DataTableSortState | DataTableSortState[] | null
+
 interface Props {
   /** 表格列定义 */
   columns: DataTableColumns<any>
@@ -34,8 +36,10 @@ interface Props {
   }>
   /** 当前筛选值 */
   filterValue?: any
-  /** 默认排序状态 */
-  defaultSortState?: DataTableSortState | null
+  /** 排序状态 */
+  sortState?: SortState
+  /** 排序模式：'single' 单列排序，'multiple' 多列排序 */
+  sortMode?: 'single' | 'multiple'
   /** 是否显示边框 */
   bordered?: boolean
   /** 是否显示条纹 */
@@ -51,7 +55,8 @@ const props = withDefaults(defineProps<Props>(), {
   searchPlaceholder: '',
   filterable: false,
   filterValue: undefined,
-  defaultSortState: null,
+  sortState: null,
+  sortMode: 'single',
   bordered: true,
   striped: false,
   error: null,
@@ -60,7 +65,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   'update:searchValue': [value: string]
   'update:filterValue': [value: any]
-  'update:sorter': [sorter: DataTableSortState | null]
+  'update:sorter': [sorter: SortState]
   'search': [value: string]
   'filter': [value: any]
 }>()
@@ -85,13 +90,17 @@ const filterValueModel = computed({
   },
 })
 
-// 排序状态
-const sortState = ref<DataTableSortState | null>(props.defaultSortState)
+// 排序状态双向绑定
+const sortStateModel = computed({
+  get: () => props.sortState,
+  set: (value: SortState) => {
+    emit('update:sorter', value)
+  },
+})
 
 // 处理排序变化
-function handleSorterChange(sorter: DataTableSortState | null) {
-  sortState.value = sorter
-  emit('update:sorter', sorter)
+function handleSorterChange(sorter: SortState) {
+  sortStateModel.value = sorter
 }
 </script>
 
@@ -138,7 +147,9 @@ function handleSorterChange(sorter: DataTableSortState | null) {
       :pagination="pagination"
       :bordered="bordered"
       :striped="striped"
-      :default-sort="defaultSortState"
+      :sort="sortStateModel"
+      :sort-mode="sortMode"
+      :remote="false"
       @update:sorter="handleSorterChange"
     />
   </div>

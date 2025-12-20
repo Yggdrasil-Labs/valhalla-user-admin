@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormInst, FormItemRule, FormRules } from 'naive-ui'
-import { h } from 'vue'
 import { useI18nHelper } from '@/composables/useI18n'
 
 interface FormField {
@@ -136,96 +135,6 @@ function handleCancel() {
   dialogVisible.value = false
   emit('cancel')
 }
-
-// 渲染表单字段
-function renderFormField(field: FormField) {
-  const { key, type = 'input', placeholder, options, disabled } = field
-
-  switch (type) {
-    case 'textarea':
-      return h('n-form-item', {
-        key,
-        path: key,
-        label: field.label,
-      }, {
-        default: () => h('n-input', {
-          'value': formData.value[key],
-          'onUpdate:value': (value: string) => {
-            formData.value[key] = value
-          },
-          'placeholder': placeholder || t('form.placeholder.pleaseEnter'),
-          'type': 'textarea',
-          'rows': 3,
-          disabled,
-        }),
-      })
-
-    case 'select':
-      return h('n-form-item', {
-        key,
-        path: key,
-        label: field.label,
-      }, {
-        default: () => h('n-select', {
-          'value': formData.value[key],
-          'onUpdate:value': (value: any) => {
-            formData.value[key] = value
-          },
-          'placeholder': placeholder || t('form.placeholder.pleaseSelect'),
-          'options': options || [],
-          disabled,
-        }),
-      })
-
-    case 'number':
-      return h('n-form-item', {
-        key,
-        path: key,
-        label: field.label,
-      }, {
-        default: () => h('n-input-number', {
-          'value': formData.value[key],
-          'onUpdate:value': (value: number) => {
-            formData.value[key] = value
-          },
-          'placeholder': placeholder || t('form.placeholder.pleaseEnter'),
-          'style': { width: '100%' },
-          disabled,
-        }),
-      })
-
-    case 'switch':
-      return h('n-form-item', {
-        key,
-        path: key,
-        label: field.label,
-      }, {
-        default: () => h('n-switch', {
-          'value': formData.value[key],
-          'onUpdate:value': (value: boolean) => {
-            formData.value[key] = value
-          },
-          disabled,
-        }),
-      })
-
-    default:
-      return h('n-form-item', {
-        key,
-        path: key,
-        label: field.label,
-      }, {
-        default: () => h('n-input', {
-          'value': formData.value[key],
-          'onUpdate:value': (value: string) => {
-            formData.value[key] = value
-          },
-          'placeholder': placeholder || t('form.placeholder.pleaseEnter'),
-          disabled,
-        }),
-      })
-  }
-}
 </script>
 
 <template>
@@ -244,11 +153,46 @@ function renderFormField(field: FormField) {
       label-placement="left"
       label-width="100px"
     >
-      <component
-        :is="() => renderFormField(field)"
-        v-for="field in fields"
-        :key="field.key"
-      />
+      <template v-for="field in fields" :key="field.key">
+        <n-form-item
+          :path="field.key"
+          :label="field.label"
+        >
+          <n-input
+            v-if="field.type === 'input' || !field.type"
+            v-model:value="formData[field.key]"
+            :placeholder="field.placeholder || t('form.placeholder.pleaseEnter')"
+            :disabled="field.disabled"
+          />
+          <n-input
+            v-else-if="field.type === 'textarea'"
+            v-model:value="formData[field.key]"
+            type="textarea"
+            :rows="3"
+            :placeholder="field.placeholder || t('form.placeholder.pleaseEnter')"
+            :disabled="field.disabled"
+          />
+          <n-select
+            v-else-if="field.type === 'select'"
+            v-model:value="formData[field.key]"
+            :placeholder="field.placeholder || t('form.placeholder.pleaseSelect')"
+            :options="field.options || []"
+            :disabled="field.disabled"
+          />
+          <n-input-number
+            v-else-if="field.type === 'number'"
+            v-model:value="formData[field.key]"
+            :placeholder="field.placeholder || t('form.placeholder.pleaseEnter')"
+            :disabled="field.disabled"
+            style="width: 100%"
+          />
+          <n-switch
+            v-else-if="field.type === 'switch'"
+            v-model:value="formData[field.key]"
+            :disabled="field.disabled"
+          />
+        </n-form-item>
+      </template>
     </n-form>
 
     <template #action>

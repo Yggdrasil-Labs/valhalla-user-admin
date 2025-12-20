@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DataTableColumns, DataTableSortState } from 'naive-ui'
 import type { CreateUserRequest, GetUsersParams, UpdateUserRequest, UserCO } from '@/types/store'
-import { useDialog, useMessage } from 'naive-ui'
+import { NButton, useDialog, useMessage } from 'naive-ui'
 import { h } from 'vue'
 import {
   createUserApi,
@@ -59,19 +59,19 @@ const columns = computed<DataTableColumns<UserCO>>(() => [
   {
     title: t('user.management.columns.id'),
     key: 'id',
-    sortable: true,
+    sorter: 'default',
     width: 80,
   },
   {
     title: t('user.management.columns.username'),
     key: 'username',
-    sortable: true,
+    sorter: 'default',
     width: 150,
   },
   {
     title: t('user.management.columns.email'),
     key: 'email',
-    sortable: true,
+    sorter: 'default',
     width: 200,
   },
   {
@@ -106,7 +106,7 @@ const columns = computed<DataTableColumns<UserCO>>(() => [
   {
     title: t('user.management.columns.createTime'),
     key: 'createTime',
-    sortable: true,
+    sorter: 'default',
     width: 180,
   },
   {
@@ -116,13 +116,13 @@ const columns = computed<DataTableColumns<UserCO>>(() => [
     fixed: 'right',
     render: (row: UserCO) => {
       return h('div', { class: 'action-buttons' }, [
-        h('n-button', {
+        h(NButton, {
           size: 'small',
           type: 'primary',
           style: { marginRight: '8px' },
           onClick: () => handleEdit(row),
         }, { default: () => t('button.edit') }),
-        h('n-button', {
+        h(NButton, {
           size: 'small',
           type: 'error',
           onClick: () => handleDelete(row),
@@ -266,36 +266,79 @@ function handleFilter(value: number | undefined) {
   fetchUsers()
 }
 
+// 比较两个值的辅助函数
+function compareValues(a: any, b: any, order: 'ascend' | 'descend' | false): number {
+  // 如果 order 是 false，不排序
+  if (order === false) {
+    return 0
+  }
+
+  // 处理 null/undefined
+  if (a === undefined || a === null) {
+    return (b === undefined || b === null) ? 0 : 1
+  }
+  if (b === undefined || b === null) {
+    return -1
+  }
+
+  // 字符串比较
+  if (typeof a === 'string' && typeof b === 'string') {
+    const result = a.localeCompare(b)
+    return order === 'ascend' ? result : -result
+  }
+
+  // 数字比较
+  if (typeof a === 'number' && typeof b === 'number') {
+    const result = a - b
+    return order === 'ascend' ? result : -result
+  }
+
+  // 其他类型，转换为字符串比较
+  const aStr = String(a)
+  const bStr = String(b)
+  const result = aStr.localeCompare(bStr)
+  return order === 'ascend' ? result : -result
+}
+
 // 处理排序
-function handleSorterChange(sorter: DataTableSortState | null) {
-  sortState.value = sorter
+function handleSorterChange(sorter: DataTableSortState | DataTableSortState[] | null) {
   // 前端排序，直接对当前数据进行排序
-  if (sorter) {
-    const { columnKey, order } = sorter
-    users.value.sort((a, b) => {
+  if (!sorter) {
+    sortState.value = null
+    return
+  }
+
+  // 处理多列排序（数组）或单列排序（对象）
+  const sorters = Array.isArray(sorter) ? sorter : [sorter]
+
+  // 更新排序状态（只保存第一个排序规则用于显示）
+  sortState.value = sorters[0] || null
+
+  // 创建数据副本进行排序
+  const sortedUsers = [...users.value].sort((a, b) => {
+    // 按多个排序规则依次比较
+    for (const sortRule of sorters) {
+      const { columnKey, order } = sortRule
+
+      // 如果 order 是 false，跳过这个排序规则
+      if (order === false) {
+        continue
+      }
+
       const aVal = a[columnKey as keyof UserCO]
       const bVal = b[columnKey as keyof UserCO]
 
-      if (aVal === undefined || aVal === null) {
-        return 1
+      const result = compareValues(aVal, bVal, order as 'ascend' | 'descend')
+      if (result !== 0) {
+        return result
       }
-      if (bVal === undefined || bVal === null) {
-        return -1
-      }
+      // 相等，继续下一个排序规则
+    }
 
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        return order === 'ascend'
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal)
-      }
+    return 0 // 所有排序规则都相等
+  })
 
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return order === 'ascend' ? aVal - bVal : bVal - aVal
-      }
-
-      return 0
-    })
-  }
+  users.value = sortedUsers
 }
 
 // 打开新增对话框
@@ -454,12 +497,12 @@ onMounted(() => {
 
     <div class="page-content">
       <div class="toolbar">
-        <n-button
+        <NButton
           type="primary"
           @click="handleAdd"
         >
           {{ t('user.management.addUser') }}
-        </n-button>
+        </NButton>
       </div>
 
       <DataTable
@@ -473,7 +516,7 @@ onMounted(() => {
         :filterable="true"
         :filter-options="filterOptions"
         :filter-value="filterValue"
-        :default-sort-state="sortState"
+        :sort-state="sortState"
         :error="error"
         @search="handleSearch"
         @filter="handleFilter"
