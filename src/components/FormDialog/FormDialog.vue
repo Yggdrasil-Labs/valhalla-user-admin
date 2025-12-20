@@ -223,6 +223,9 @@ function handleCancel() {
 </template>
 
 <style scoped lang="scss">
+@use 'sass:map';
+@use '@/assets/scss/base/variables' as *;
+
 :deep(.n-modal) {
   .n-card {
     border-radius: 12px !important;
@@ -244,9 +247,9 @@ function handleCancel() {
 
 .dialog-title {
   text-align: center;
-  font-size: 18px;
+  font-size: map.get($font-sizes, xl); // 20px
   font-weight: 600;
-  color: #1f2937;
+  color: map.get($colors, gray-800);
   width: 100%;
 }
 

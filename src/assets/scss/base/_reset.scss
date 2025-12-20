@@ -15,6 +15,9 @@ body {
   background-color: get-color(white);
   min-width: 320px;
   min-height: 100vh;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 // 标题样式
@@ -29,6 +32,7 @@ h6 {
   font-weight: font-weight(semibold);
   line-height: 1.2;
   color: get-color(gray-900);
+  transition: color 0.3s ease;
 }
 
 h1 {
@@ -127,6 +131,9 @@ td {
   padding: spacing(3) spacing(4);
   text-align: left;
   border-bottom: 1px solid get-color(gray-200);
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease;
 }
 
 th {
@@ -147,6 +154,9 @@ code {
   background-color: get-color(gray-100);
   border-radius: border-radius(sm);
   color: get-color(gray-700);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 pre {
@@ -154,6 +164,7 @@ pre {
   background-color: get-color(gray-100);
   border-radius: border-radius(base);
   overflow-x: auto;
+  transition: background-color 0.3s ease;
 
   code {
     padding: 0;

@@ -486,15 +486,6 @@ onMounted(() => {
 
 <template>
   <div class="user-management-page">
-    <div class="page-header">
-      <h1 class="page-title">
-        {{ t('user.management.title') }}
-      </h1>
-      <p class="page-description">
-        {{ t('user.management.description') }}
-      </p>
-    </div>
-
     <div class="page-content">
       <DataTable
         :columns="columns"
@@ -540,33 +531,18 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .user-management-page {
-  padding: 24px;
   max-width: 1400px;
   margin: 0 auto;
-}
-
-.page-header {
-  margin-bottom: 24px;
-
-  .page-title {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-    color: #1f2937;
-  }
-
-  .page-description {
-    font-size: 14px;
-    color: #6b7280;
-    margin: 0;
-  }
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-content {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .action-buttons {

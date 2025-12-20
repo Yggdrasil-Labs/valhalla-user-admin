@@ -40,7 +40,7 @@ function handleLanguageChange(event: Event): void {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .language-switcher {
   display: inline-block;
 }
@@ -50,18 +50,19 @@ function handleLanguageChange(event: Event): void {
   border: 1px solid #d1d5db;
   border-radius: 6px;
   background-color: white;
+  color: #1e293b;
   font-size: 14px;
   cursor: pointer;
-  transition: border-color 0.2s ease;
-}
+  transition: all 0.2s ease;
 
-.language-select:hover {
-  border-color: #9ca3af;
-}
+  &:hover {
+    border-color: #9ca3af;
+  }
 
-.language-select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
 }
 </style>

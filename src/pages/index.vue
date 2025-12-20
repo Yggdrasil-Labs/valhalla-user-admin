@@ -26,13 +26,13 @@ const userStore = useUserStore()
       <div class="main-content">
         <div class="welcome-section">
           <h1 class="welcome-title">
-            欢迎来到 <span class="gradient-text">Valhalla User Admin</span>
+            欢迎来到 Valhalla User Admin
           </h1>
           <p class="welcome-subtitle">
             用户管理后台系统
           </p>
           <div v-if="userStore.userInfo" class="user-welcome">
-            <p class="welcome-message">
+            <p class="welcome-message body-text">
               欢迎，{{ userStore.displayName }}！
             </p>
           </div>
@@ -43,9 +43,12 @@ const userStore = useUserStore()
 </template>
 
 <style lang="scss" scoped>
+@use 'sass:map';
+@use '@/assets/scss/base/variables' as *;
+
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: map.get($colors, white);
   position: relative;
   overflow-x: hidden;
 }
@@ -57,16 +60,16 @@ const userStore = useUserStore()
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(map.get($colors, white), 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1rem 0;
+  border-bottom: 1px solid map.get($colors, gray-200);
+  padding: map.get($spacings, 4) 0; // 16px
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 map.get($spacings, 8); // 32px
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -74,34 +77,31 @@ const userStore = useUserStore()
 
 .nav-brand h1 {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: map.get($font-sizes, 2xl); // 24px
+  font-weight: 600;
+  color: map.get($colors, gray-900);
 }
 
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: map.get($spacings, 4); // 16px
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: map.get($spacings, 2); // 8px
 }
 
 .user-name {
   font-weight: 500;
-  color: #374151;
+  color: map.get($colors, gray-700);
 }
 
 // 主要内容区域
 .main-section {
-  padding: 10rem 2rem 4rem;
+  padding: map.get($spacings, 16) map.get($spacings, 8) map.get($spacings, 8); // 160px, 32px, 64px
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -115,59 +115,59 @@ const userStore = useUserStore()
 }
 
 .welcome-section {
-  color: white;
+  color: map.get($colors, gray-800);
 }
 
 .welcome-title {
-  font-size: 3rem;
-  font-weight: 800;
+  font-size: map.get($font-sizes, 3xl); // 30px
+  font-weight: 700;
   line-height: 1.2;
-  margin-bottom: 1rem;
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin-bottom: map.get($spacings, 4); // 16px
+  color: map.get($colors, gray-900);
 }
 
 .welcome-subtitle {
-  font-size: 1.25rem;
-  opacity: 0.9;
-  margin-bottom: 2rem;
+  font-size: map.get($font-sizes, xl); // 20px
+  color: map.get($colors, gray-600);
+  margin-bottom: map.get($spacings, 8); // 32px
   line-height: 1.6;
 }
 
+.body-text {
+  font-size: map.get($font-sizes, sm); // 14px
+  line-height: 1.5;
+  color: map.get($colors, gray-700);
+}
+
 .user-welcome {
-  margin-top: 2rem;
+  margin-top: map.get($spacings, 8); // 32px
 }
 
 .welcome-message {
-  font-size: 1.1rem;
-  opacity: 0.95;
+  font-size: map.get($font-sizes, sm); // 14px
+  color: map.get($colors, gray-700);
 }
 
 // 响应式设计
 @media (max-width: 768px) {
   .main-section {
-    padding: 8rem 2rem 2rem;
+    padding: map.get($spacings, 12) map.get($spacings, 8) map.get($spacings, 8); // 128px, 32px, 32px
   }
 
   .welcome-title {
-    font-size: 2rem;
+    font-size: map.get($font-sizes, 2xl); // 24px
   }
 
   .welcome-subtitle {
-    font-size: 1rem;
+    font-size: map.get($font-sizes, base); // 16px
   }
 
   .nav-container {
-    padding: 0 1rem;
+    padding: 0 map.get($spacings, 4); // 16px
   }
 
   .nav-brand h1 {
-    font-size: 1.25rem;
+    font-size: map.get($font-sizes, xl); // 20px
   }
 }
 </style>

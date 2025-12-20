@@ -14,7 +14,9 @@ export {
   useUser,
 } from './useStores'
 
+// 主题相关组合函数
+export { useTheme } from './useTheme'
+
 // 可以在这里添加更多组合函数的导出
-// export { useTheme } from './useTheme'
 // export { useApi } from './useApi'
 // export { useForm } from './useForm'

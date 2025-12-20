@@ -81,14 +81,18 @@ const emit = defineEmits<{
 
 const { t } = useI18nHelper()
 
-// 搜索值双向绑定
+// 搜索值双向绑定（仅更新值，不自动触发查询）
 const searchValueModel = computed({
   get: () => props.searchValue,
   set: (value: string) => {
     emit('update:searchValue', value)
-    emit('search', value)
   },
 })
+
+// 处理搜索按钮点击
+function handleSearchClick() {
+  emit('search', searchValueModel.value)
+}
 
 // 筛选值双向绑定
 const filterValueModel = computed({
@@ -138,16 +142,6 @@ const resizableColumns = computed(() => {
       <!-- 搜索和筛选栏 -->
       <div v-if="searchable || filterable || $slots.toolbar" class="data-table-toolbar">
         <div class="toolbar-left">
-          <!-- 搜索框 -->
-          <div v-if="searchable" class="search-box">
-            <n-input
-              v-model:value="searchValueModel"
-              :placeholder="searchPlaceholder || t('button.search')"
-              clearable
-              :style="{ width: typeof filterWidth === 'number' ? `${filterWidth}px` : filterWidth }"
-            />
-          </div>
-
           <!-- 筛选器 -->
           <div v-if="filterable && filterOptions" class="filter-box">
             <n-select
@@ -158,22 +152,33 @@ const resizableColumns = computed(() => {
               :style="{ width: typeof filterWidth === 'number' ? `${filterWidth}px` : filterWidth }"
             />
           </div>
+
+          <!-- 搜索输入框 -->
+          <div v-if="searchable" class="search-input">
+            <n-input
+              v-model:value="searchValueModel"
+              :placeholder="searchPlaceholder || t('button.search')"
+              clearable
+              :style="{ width: typeof filterWidth === 'number' ? `${filterWidth}px` : filterWidth }"
+              @keyup.enter="handleSearchClick"
+            />
+          </div>
+
+          <!-- 搜索按钮 -->
+          <div v-if="searchable" class="search-button">
+            <n-button
+              type="primary"
+              @click="handleSearchClick"
+            >
+              {{ t('button.search') }}
+            </n-button>
+          </div>
         </div>
 
         <!-- 右侧操作按钮插槽 -->
         <div v-if="$slots.toolbar" class="toolbar-right">
           <slot name="toolbar" />
         </div>
-      </div>
-
-      <!-- 错误提示 -->
-      <div v-if="error" class="error-alert">
-        <n-alert
-          type="error"
-          :title="t('status.error')"
-        >
-          {{ error }}
-        </n-alert>
       </div>
 
       <!-- 数据表格 -->
@@ -197,28 +202,17 @@ const resizableColumns = computed(() => {
 </template>
 
 <style scoped lang="scss">
+@use 'sass:map';
+@use '@/assets/scss/base/variables' as *;
+
 .data-table-wrapper {
   width: 100%;
 }
 
 .data-table-container {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
-  transition: box-shadow 0.3s ease;
   padding: 16px;
-
-  &:hover {
-    box-shadow:
-      0 6px 24px rgba(0, 0, 0, 0.12),
-      0 2px 8px rgba(0, 0, 0, 0.06);
-  }
+  background-color: map.get($colors, white);
+  border-radius: 8px;
 
   .data-table-toolbar {
     display: flex;
@@ -239,53 +233,16 @@ const resizableColumns = computed(() => {
       flex-shrink: 0;
     }
 
-    .search-box {
-      flex-shrink: 0;
-    }
-
     .filter-box {
       flex-shrink: 0;
     }
-  }
 
-  .error-alert {
-    margin-bottom: 16px;
-  }
-
-  .data-table-content {
-    :deep(.n-data-table) {
-      background: transparent;
+    .search-input {
+      flex-shrink: 0;
     }
 
-    :deep(.n-data-table-wrapper) {
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    :deep(.n-data-table-thead) {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-
-    :deep(.n-data-table-tbody) {
-      background: transparent;
-    }
-
-    :deep(.n-data-table-td) {
-      background: transparent;
-      border-color: rgba(0, 0, 0, 0.06);
-    }
-
-    :deep(.n-data-table-th) {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-color: rgba(0, 0, 0, 0.06);
-    }
-
-    :deep(.n-data-table-tr:hover .n-data-table-td) {
-      background: rgba(0, 0, 0, 0.02);
+    .search-button {
+      flex-shrink: 0;
     }
   }
 }

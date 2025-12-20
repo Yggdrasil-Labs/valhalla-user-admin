@@ -120,6 +120,7 @@
   "navigation": {
     "home": "Home",
     "dashboard": "Dashboard",
+    "userManagement": "User Management",
     "settings": "Settings",
     "profile": "Profile",
     "help": "Help",
