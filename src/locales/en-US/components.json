@@ -1,0 +1,22 @@
+{
+  "binding": {
+    "title": {
+      "assignRoles": "Assign Roles to User",
+      "assignPermissions": "Assign Permissions to Role",
+      "assignApis": "Assign APIs to Permission"
+    },
+    "searchPlaceholder": "Enter {field}",
+    "selectedCount": "{count} selected",
+    "emptyState": {
+      "noData": "No data",
+      "noSearchResults": "No matching items found",
+      "noFilterResults": "No items match the filter criteria"
+    },
+    "messages": {
+      "loadFailed": "Failed to load data",
+      "noChanges": "No changes to save",
+      "bindSuccess": "Binding successful",
+      "bindFailed": "Binding failed"
+    }
+  }
+}

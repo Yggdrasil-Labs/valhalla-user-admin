@@ -18,9 +18,19 @@ async function loadLocaleMessages(locale: Locale) {
   }
 
   try {
-    // 使用动态导入加载 JSON 文件
-    const messages = await import(`./${locale}/common.json`)
-    const messageData = messages.default
+    // 并行加载多个国际化文件
+    const [common, components, business] = await Promise.all([
+      import(`./${locale}/common.json`).catch(() => ({ default: {} })),
+      import(`./${locale}/components.json`).catch(() => ({ default: {} })),
+      import(`./${locale}/business.json`).catch(() => ({ default: {} })),
+    ])
+
+    // 合并所有消息对象
+    const messageData = {
+      ...common.default,
+      ...components.default,
+      ...business.default,
+    }
 
     // 缓存消息
     messageCache.set(locale, messageData)

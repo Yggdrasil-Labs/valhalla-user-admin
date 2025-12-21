@@ -1,0 +1,22 @@
+{
+  "binding": {
+    "title": {
+      "assignRoles": "为用户分配角色",
+      "assignPermissions": "为角色分配权限",
+      "assignApis": "为权限分配API"
+    },
+    "searchPlaceholder": "请输入{field}",
+    "selectedCount": "已选择 {count} 项",
+    "emptyState": {
+      "noData": "暂无数据",
+      "noSearchResults": "未找到匹配项",
+      "noFilterResults": "未找到符合条件的项"
+    },
+    "messages": {
+      "loadFailed": "加载数据失败",
+      "noChanges": "没有变更，无需保存",
+      "bindSuccess": "绑定成功",
+      "bindFailed": "绑定失败"
+    }
+  }
+}
