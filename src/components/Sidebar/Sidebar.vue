@@ -89,6 +89,24 @@ const menuOptions = computed<MenuOption[]>(() => [
       h('path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' }),
     ]),
   },
+  {
+    label: () => t('navigation.apiManagement'),
+    key: '/api',
+    icon: () => h('svg', {
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: '20',
+      height: '20',
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      stroke: 'currentColor',
+      strokeWidth: '2',
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+    }, [
+      h('polyline', { points: '16 18 22 12 16 6' }),
+      h('polyline', { points: '8 6 2 12 8 18' }),
+    ]),
+  },
 ])
 
 // 当前选中的菜单项

@@ -123,6 +123,7 @@
     "userManagement": "User Management",
     "roleManagement": "Role Management",
     "permissionManagement": "Permission Management",
+    "apiManagement": "API Management",
     "settings": "Settings",
     "profile": "Profile",
     "help": "Help",
@@ -287,6 +288,46 @@
       },
       "confirm": {
         "deletePermission": "Are you sure you want to delete permission {permissionName}?"
+      }
+    }
+  },
+  "api": {
+    "management": {
+      "title": "API Management",
+      "description": "Manage system APIs",
+      "addApi": "Add API",
+      "editApi": "Edit API",
+      "deleteApi": "Delete API",
+      "columns": {
+        "id": "ID",
+        "apiCode": "API Code",
+        "apiName": "API Name",
+        "resourcePath": "Resource Path",
+        "resourceMethod": "HTTP Method",
+        "description": "Description",
+        "createTime": "Create Time",
+        "updateTime": "Update Time",
+        "actions": "Actions"
+      },
+      "form": {
+        "apiCode": "API Code",
+        "apiName": "API Name",
+        "resourcePath": "Resource Path",
+        "resourceMethod": "HTTP Method",
+        "description": "Description",
+        "metadata": "Metadata"
+      },
+      "messages": {
+        "createSuccess": "API created successfully",
+        "createFailed": "Failed to create API",
+        "updateSuccess": "API updated successfully",
+        "updateFailed": "Failed to update API",
+        "deleteSuccess": "API deleted successfully",
+        "deleteFailed": "Failed to delete API",
+        "loadFailed": "Failed to load API list"
+      },
+      "confirm": {
+        "deleteApi": "Are you sure you want to delete API {apiName}?"
       }
     }
   },

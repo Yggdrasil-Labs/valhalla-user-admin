@@ -123,6 +123,7 @@
     "userManagement": "用户管理",
     "roleManagement": "角色管理",
     "permissionManagement": "权限管理",
+    "apiManagement": "API管理",
     "settings": "设置",
     "profile": "个人资料",
     "help": "帮助",
@@ -287,6 +288,46 @@
       },
       "confirm": {
         "deletePermission": "确定要删除权限 {permissionName} 吗？"
+      }
+    }
+  },
+  "api": {
+    "management": {
+      "title": "API管理",
+      "description": "管理系统API",
+      "addApi": "新增API",
+      "editApi": "编辑API",
+      "deleteApi": "删除API",
+      "columns": {
+        "id": "ID",
+        "apiCode": "接口代码",
+        "apiName": "接口名称",
+        "resourcePath": "资源路径",
+        "resourceMethod": "HTTP方法",
+        "description": "描述",
+        "createTime": "创建时间",
+        "updateTime": "更新时间",
+        "actions": "操作"
+      },
+      "form": {
+        "apiCode": "接口代码",
+        "apiName": "接口名称",
+        "resourcePath": "资源路径",
+        "resourceMethod": "HTTP方法",
+        "description": "描述",
+        "metadata": "扩展信息"
+      },
+      "messages": {
+        "createSuccess": "创建API成功",
+        "createFailed": "创建API失败",
+        "updateSuccess": "更新API成功",
+        "updateFailed": "更新API失败",
+        "deleteSuccess": "删除API成功",
+        "deleteFailed": "删除API失败",
+        "loadFailed": "加载API列表失败"
+      },
+      "confirm": {
+        "deleteApi": "确定要删除API {apiName} 吗？"
       }
     }
   },
