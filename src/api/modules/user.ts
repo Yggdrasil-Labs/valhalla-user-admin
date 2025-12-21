@@ -41,7 +41,7 @@ export function getUsersApi(params?: GetUsersParams): Promise<PaginatedUserRespo
  * 获取用户详情
  * @param id 用户ID
  */
-export function getUserApi(id: number): Promise<SingleUserResponse> {
+export function getUserApi(id: string): Promise<SingleUserResponse> {
   return http.get(`/api/v1/users/${id}`)
 }
 
@@ -58,7 +58,7 @@ export function createUserApi(data: CreateUserRequest): Promise<SingleUserRespon
  * @param id 用户ID
  * @param data 用户数据
  */
-export function updateUserApi(id: number, data: UpdateUserRequest): Promise<SingleUserResponse> {
+export function updateUserApi(id: string, data: UpdateUserRequest): Promise<SingleUserResponse> {
   return http.put(`/api/v1/users/${id}`, { ...data, id })
 }
 
@@ -66,7 +66,7 @@ export function updateUserApi(id: number, data: UpdateUserRequest): Promise<Sing
  * 删除用户
  * @param id 用户ID
  */
-export function deleteUserApi(id: number): Promise<ApiResponse<void>> {
+export function deleteUserApi(id: string): Promise<ApiResponse<void>> {
   return http.delete(`/api/v1/users/${id}`)
 }
 
@@ -75,6 +75,6 @@ export function deleteUserApi(id: number): Promise<ApiResponse<void>> {
  * @param id 用户ID
  * @param data 角色数据
  */
-export function assignUserRolesApi(id: number, data: AssignUserRoleRequest): Promise<ApiResponse<void>> {
+export function assignUserRolesApi(id: string, data: AssignUserRoleRequest): Promise<ApiResponse<void>> {
   return http.post(`/api/v1/users/${id}/roles`, data)
 }

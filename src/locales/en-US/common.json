@@ -121,6 +121,8 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "userManagement": "User Management",
+    "roleManagement": "Role Management",
+    "permissionManagement": "Permission Management",
     "settings": "Settings",
     "profile": "Profile",
     "help": "Help",
@@ -185,6 +187,101 @@
         "deleteUser": "Are you sure you want to delete user {username}?",
         "disableUser": "Are you sure you want to disable user {username}?",
         "enableUser": "Are you sure you want to enable user {username}?"
+      }
+    }
+  },
+  "role": {
+    "management": {
+      "title": "Role Management",
+      "description": "Manage system roles",
+      "addRole": "Add Role",
+      "editRole": "Edit Role",
+      "deleteRole": "Delete Role",
+      "assignPermissions": "Assign Permissions",
+      "columns": {
+        "id": "ID",
+        "roleCode": "Role Code",
+        "roleName": "Role Name",
+        "description": "Description",
+        "isSystem": "System Role",
+        "permissionIds": "Permissions",
+        "createTime": "Create Time",
+        "updateTime": "Update Time",
+        "actions": "Actions"
+      },
+      "form": {
+        "roleCode": "Role Code",
+        "roleName": "Role Name",
+        "description": "Description",
+        "isSystem": "System Role",
+        "metadata": "Metadata",
+        "permissionIds": "Permissions"
+      },
+      "status": {
+        "system": "System Role",
+        "custom": "Custom Role"
+      },
+      "messages": {
+        "createSuccess": "Role created successfully",
+        "createFailed": "Failed to create role",
+        "updateSuccess": "Role updated successfully",
+        "updateFailed": "Failed to update role",
+        "deleteSuccess": "Role deleted successfully",
+        "deleteFailed": "Failed to delete role",
+        "assignPermissionsSuccess": "Permissions assigned successfully",
+        "assignPermissionsFailed": "Failed to assign permissions",
+        "loadFailed": "Failed to load role list",
+        "cannotDeleteSystemRole": "System roles cannot be deleted"
+      },
+      "confirm": {
+        "deleteRole": "Are you sure you want to delete role {roleName}?",
+        "deleteSystemRole": "System roles cannot be deleted"
+      }
+    }
+  },
+  "permission": {
+    "management": {
+      "title": "Permission Management",
+      "description": "Manage system permissions",
+      "addPermission": "Add Permission",
+      "editPermission": "Edit Permission",
+      "deletePermission": "Delete Permission",
+      "assignApis": "Assign APIs",
+      "columns": {
+        "id": "ID",
+        "module": "Module",
+        "resource": "Resource",
+        "action": "Action",
+        "permissionCode": "Permission Code",
+        "permissionName": "Permission Name",
+        "description": "Description",
+        "apiIds": "APIs",
+        "createTime": "Create Time",
+        "updateTime": "Update Time",
+        "actions": "Actions"
+      },
+      "form": {
+        "module": "Module",
+        "resource": "Resource",
+        "action": "Action",
+        "permissionName": "Permission Name",
+        "description": "Description",
+        "metadata": "Metadata",
+        "apiIds": "API List"
+      },
+      "messages": {
+        "createSuccess": "Permission created successfully",
+        "createFailed": "Failed to create permission",
+        "updateSuccess": "Permission updated successfully",
+        "updateFailed": "Failed to update permission",
+        "deleteSuccess": "Permission deleted successfully",
+        "deleteFailed": "Failed to delete permission",
+        "assignApisSuccess": "APIs assigned successfully",
+        "assignApisFailed": "Failed to assign APIs",
+        "loadFailed": "Failed to load permission list"
+      },
+      "confirm": {
+        "deletePermission": "Are you sure you want to delete permission {permissionName}?"
       }
     }
   },

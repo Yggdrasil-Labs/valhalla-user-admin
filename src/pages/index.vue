@@ -47,10 +47,10 @@ const userStore = useUserStore()
 @use '@/assets/scss/base/variables' as *;
 
 .home-page {
-  min-height: 100vh;
+  height: 100vh;
   background: map.get($colors, white);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden; // 防止整个页面产生滚动条
 }
 
 // 导航栏
@@ -102,10 +102,11 @@ const userStore = useUserStore()
 // 主要内容区域
 .main-section {
   padding: map.get($spacings, 16) map.get($spacings, 8) map.get($spacings, 8); // 160px, 32px, 64px
-  min-height: 100vh;
+  height: calc(100vh - 64px); // 减去导航栏高度，避免滚动条
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden; // 防止内容溢出产生滚动条
 }
 
 .main-content {

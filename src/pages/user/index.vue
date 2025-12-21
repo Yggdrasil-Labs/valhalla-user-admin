@@ -57,37 +57,36 @@ const formLoading = ref(false)
 // 表格列定义
 const columns = computed<DataTableColumns<UserCO>>(() => [
   {
-    title: t('user.management.columns.id'),
-    key: 'id',
-    sorter: 'default',
-    width: 80,
-  },
-  {
     title: t('user.management.columns.username'),
     key: 'username',
     sorter: 'default',
     width: 150,
+    align: 'left',
   },
   {
     title: t('user.management.columns.email'),
     key: 'email',
     sorter: 'default',
     width: 200,
+    align: 'left',
   },
   {
     title: t('user.management.columns.phone'),
     key: 'phone',
     width: 150,
+    align: 'left',
   },
   {
     title: t('user.management.columns.nickname'),
     key: 'nickname',
     width: 150,
+    align: 'left',
   },
   {
     title: t('user.management.columns.status'),
     key: 'status',
     width: 100,
+    align: 'center',
     render: (row: UserCO) => {
       return h(StatusSwitch, {
         value: row.status,
@@ -108,12 +107,14 @@ const columns = computed<DataTableColumns<UserCO>>(() => [
     key: 'createTime',
     sorter: 'default',
     width: 180,
+    align: 'left',
   },
   {
     title: t('user.management.columns.actions'),
     key: 'actions',
     width: 200,
     fixed: 'right',
+    align: 'center',
     render: (row: UserCO) => {
       return h('div', { class: 'action-buttons' }, [
         h(NButton, {
@@ -531,8 +532,8 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .user-management-page {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;

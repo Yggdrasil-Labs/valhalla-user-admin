@@ -121,6 +121,8 @@
     "home": "首页",
     "dashboard": "仪表板",
     "userManagement": "用户管理",
+    "roleManagement": "角色管理",
+    "permissionManagement": "权限管理",
     "settings": "设置",
     "profile": "个人资料",
     "help": "帮助",
@@ -185,6 +187,101 @@
         "deleteUser": "确定要删除用户 {username} 吗？",
         "disableUser": "确定要禁用用户 {username} 吗？",
         "enableUser": "确定要启用用户 {username} 吗？"
+      }
+    }
+  },
+  "role": {
+    "management": {
+      "title": "角色管理",
+      "description": "管理系统角色",
+      "addRole": "新增角色",
+      "editRole": "编辑角色",
+      "deleteRole": "删除角色",
+      "assignPermissions": "分配权限",
+      "columns": {
+        "id": "ID",
+        "roleCode": "角色代码",
+        "roleName": "角色名称",
+        "description": "描述",
+        "isSystem": "系统角色",
+        "permissionIds": "权限",
+        "createTime": "创建时间",
+        "updateTime": "更新时间",
+        "actions": "操作"
+      },
+      "form": {
+        "roleCode": "角色代码",
+        "roleName": "角色名称",
+        "description": "描述",
+        "isSystem": "系统角色",
+        "metadata": "扩展信息",
+        "permissionIds": "权限列表"
+      },
+      "status": {
+        "system": "系统角色",
+        "custom": "自定义角色"
+      },
+      "messages": {
+        "createSuccess": "创建角色成功",
+        "createFailed": "创建角色失败",
+        "updateSuccess": "更新角色成功",
+        "updateFailed": "更新角色失败",
+        "deleteSuccess": "删除角色成功",
+        "deleteFailed": "删除角色失败",
+        "assignPermissionsSuccess": "分配权限成功",
+        "assignPermissionsFailed": "分配权限失败",
+        "loadFailed": "加载角色列表失败",
+        "cannotDeleteSystemRole": "系统角色不可删除"
+      },
+      "confirm": {
+        "deleteRole": "确定要删除角色 {roleName} 吗？",
+        "deleteSystemRole": "系统角色不可删除"
+      }
+    }
+  },
+  "permission": {
+    "management": {
+      "title": "权限管理",
+      "description": "管理系统权限",
+      "addPermission": "新增权限",
+      "editPermission": "编辑权限",
+      "deletePermission": "删除权限",
+      "assignApis": "分配API",
+      "columns": {
+        "id": "ID",
+        "module": "模块",
+        "resource": "资源",
+        "action": "操作",
+        "permissionCode": "权限代码",
+        "permissionName": "权限名称",
+        "description": "描述",
+        "apiIds": "API",
+        "createTime": "创建时间",
+        "updateTime": "更新时间",
+        "actions": "操作"
+      },
+      "form": {
+        "module": "模块",
+        "resource": "资源",
+        "action": "操作",
+        "permissionName": "权限名称",
+        "description": "描述",
+        "metadata": "扩展信息",
+        "apiIds": "API列表"
+      },
+      "messages": {
+        "createSuccess": "创建权限成功",
+        "createFailed": "创建权限失败",
+        "updateSuccess": "更新权限成功",
+        "updateFailed": "更新权限失败",
+        "deleteSuccess": "删除权限成功",
+        "deleteFailed": "删除权限失败",
+        "assignApisSuccess": "分配API成功",
+        "assignApisFailed": "分配API失败",
+        "loadFailed": "加载权限列表失败"
+      },
+      "confirm": {
+        "deletePermission": "确定要删除权限 {permissionName} 吗？"
       }
     }
   },

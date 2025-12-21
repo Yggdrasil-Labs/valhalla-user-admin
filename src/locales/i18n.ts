@@ -81,12 +81,18 @@ function getInitialLocale(): Locale {
 const i18n = createI18n({
   legacy: false, // 使用 Composition API 模式
   locale: getInitialLocale(), // 动态获取初始语言
-  fallbackLocale: 'en-US', // 备用语言
+  // 语言环境继承链配置（处理 zh -> zh-CN, en -> en-US 的回退）
+  fallbackLocale: {
+    zh: ['zh-CN'],
+    en: ['en-US'],
+    default: ['en-US'],
+  },
   messages: {}, // 初始为空，动态加载
   // 全局属性
   globalInjection: true,
-  // 警告模式（开发环境）
-  warnHtmlMessage: import.meta.env.DEV,
+  // 禁用缺失翻译和回退的警告（语言包懒加载的标准做法）
+  missingWarn: false,
+  fallbackWarn: false,
 })
 
 // 语言切换函数
@@ -128,15 +134,6 @@ async function preloadLocales() {
 }
 
 // 初始化语言包
-async function initializeLocale() {
-  const initialLocale = getInitialLocale()
-  await setLocale(initialLocale)
-
-  // 预加载其他语言包
-  preloadLocales()
-}
-
-// 自动初始化
-initializeLocale()
+setLocale(getInitialLocale()).then(() => preloadLocales())
 
 export default i18n

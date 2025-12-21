@@ -81,10 +81,21 @@ const emit = defineEmits<{
 
 const { t } = useI18nHelper()
 
+// 使用内部 ref 管理搜索值，确保输入框可以正常输入
+const internalSearchValue = ref(props.searchValue || '')
+
+// 同步 props 的变化到内部值
+watch(() => props.searchValue, (newValue) => {
+  if (newValue !== undefined && newValue !== internalSearchValue.value) {
+    internalSearchValue.value = newValue
+  }
+}, { immediate: true })
+
 // 搜索值双向绑定（仅更新值，不自动触发查询）
 const searchValueModel = computed({
-  get: () => props.searchValue,
+  get: () => internalSearchValue.value,
   set: (value: string) => {
+    internalSearchValue.value = value
     emit('update:searchValue', value)
   },
 })
@@ -94,10 +105,21 @@ function handleSearchClick() {
   emit('search', searchValueModel.value)
 }
 
+// 使用内部 ref 管理筛选值
+const internalFilterValue = ref(props.filterValue)
+
+// 同步 props 的变化到内部值
+watch(() => props.filterValue, (newValue) => {
+  if (newValue !== internalFilterValue.value) {
+    internalFilterValue.value = newValue
+  }
+}, { immediate: true })
+
 // 筛选值双向绑定
 const filterValueModel = computed({
-  get: () => props.filterValue,
+  get: () => internalFilterValue.value,
   set: (value: any) => {
+    internalFilterValue.value = value
     emit('update:filterValue', value)
     emit('filter', value)
   },

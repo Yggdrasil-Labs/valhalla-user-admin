@@ -18,7 +18,7 @@ export interface UserInfo {
 
 // 用户数据对象（与后端 API 一致）
 export interface UserCO {
-  id: number
+  id: string
   username: string
   email?: string
   phone?: string
@@ -26,7 +26,7 @@ export interface UserCO {
   avatar?: string
   status: number // 0-禁用，1-启用
   metadata?: string // 扩展信息（JSON）
-  roleIds?: number[]
+  roleIds?: string[]
   createTime?: string
   updateTime?: string
 }
@@ -40,12 +40,12 @@ export interface CreateUserRequest {
   avatar?: string
   status?: number // 0-禁用，1-启用（默认启用）
   metadata?: string // 扩展信息（JSON）
-  roleIds?: number[]
+  roleIds?: string[]
 }
 
 // 更新用户请求
 export interface UpdateUserRequest {
-  id: number // 必填
+  id: string // 必填
   email?: string
   phone?: string
   nickname?: string
@@ -74,5 +74,5 @@ export type SingleUserResponse = ApiResponse<UserCO>
 
 // 分配用户角色请求
 export interface AssignUserRoleRequest {
-  roleIds: number[]
+  roleIds: string[]
 }

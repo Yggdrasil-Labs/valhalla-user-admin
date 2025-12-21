@@ -27,7 +27,7 @@ onMounted(() => {
           <Navbar />
           <div class="app-layout">
             <Sidebar ref="sidebarRef" />
-            <main class="app-main" :style="{ marginLeft: `${sidebarWidth}px` }">
+            <main class="app-main" :style="{ 'margin-left': `${sidebarWidth}px`, '--sidebar-width': `${sidebarWidth}px` }">
               <RouterView />
             </main>
           </div>
@@ -62,9 +62,8 @@ onMounted(() => {
   padding: 24px;
   height: calc(100vh - 64px);
   transition: margin-left 0.3s ease;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
+  width: calc(100vw - var(--sidebar-width, 240px));
+  max-width: calc(100vw - var(--sidebar-width, 240px));
   overflow-x: hidden; // 防止内容溢出导致水平滚动
   box-sizing: border-box;
   display: flex;
@@ -75,7 +74,8 @@ onMounted(() => {
 @media (max-width: 768px) {
   .app-main {
     padding: 16px;
-    max-width: calc(100vw - 64px);
+    width: calc(100vw - var(--sidebar-width, 64px));
+    max-width: calc(100vw - var(--sidebar-width, 64px));
   }
 }
 </style>

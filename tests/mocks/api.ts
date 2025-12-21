@@ -13,7 +13,7 @@ export const userApiMocks = {
     code: 200,
     message: '获取用户信息成功',
     data: {
-      id: 1,
+      id: '1',
       username: 'testUser',
       email: 'test@example.com',
       avatar: '/avatar.jpg',
@@ -28,7 +28,7 @@ export const userApiMocks = {
     code: 200,
     message: '更新用户信息成功',
     data: {
-      id: 1,
+      id: '1',
       username: 'testUser',
       email: 'test@example.com',
       avatar: '/avatar.jpg',
