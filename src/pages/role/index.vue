@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { DataTableColumns, DataTableSortState } from 'naive-ui'
 import type { CreateRoleRequest, GetRolesParams, RoleCO, UpdateRoleRequest } from '@/types/store'
+import type { BindingDialogConfig } from '@/types/store/binding'
 import { NButton, NTag, useDialog, useMessage } from 'naive-ui'
 import { h } from 'vue'
-import {
-  createRoleApi,
-  deleteRoleApi,
-  getRolesApi,
-  updateRoleApi,
-} from '@/api/modules/role'
+import { getPermissionsApi } from '@/api/modules/permission'
+import { assignRolePermissionsApi, createRoleApi, deleteRoleApi, getRolesApi, updateRoleApi } from '@/api/modules/role'
+
+import { BindingDialog } from '@/components/BindingDialog'
 import { DataTable } from '@/components/DataTable'
 import { FormDialog } from '@/components/FormDialog'
 import { useI18nHelper } from '@/composables/useI18n'
@@ -52,6 +51,50 @@ const formDialogVisible = ref(false)
 const formDialogTitle = ref('')
 const editingRole = ref<RoleCO | null>(null)
 const formLoading = ref(false)
+
+// 分配权限对话框
+const assignPermissionDialogVisible = ref(false)
+const assigningRole = ref<RoleCO | null>(null)
+const assignPermissionLoading = ref(false)
+
+// 权限模块选项（用于筛选）
+const permissionModuleOptions = ref<Array<{ label: string, value: string }>>([])
+
+// 获取权限模块列表
+async function fetchPermissionModules() {
+  try {
+    // 获取所有权限以提取模块列表
+    const response = await getPermissionsApi({ pageSize: 1000 })
+    if (response.success && response.data) {
+      const modules = new Set<string>()
+      response.data.forEach((permission) => {
+        if (permission.module) {
+          modules.add(permission.module)
+        }
+      })
+      permissionModuleOptions.value = Array.from(modules).map(module => ({ label: module, value: module }))
+    }
+  }
+  catch {
+    // 忽略错误，使用空列表
+    permissionModuleOptions.value = []
+  }
+}
+
+// 绑定对话框配置
+const permissionBindingConfig = computed<BindingDialogConfig>(() => ({
+  fetchData: getPermissionsApi,
+  searchField: 'permissionName',
+  filterField: 'module',
+  filterOptions: permissionModuleOptions.value,
+  displayField: t('permission.management.columns.permissionName'),
+  columns: [
+    { title: t('permission.management.columns.module'), key: 'module', width: 120 },
+    { title: t('permission.management.columns.permissionCode'), key: 'permissionCode', width: 200 },
+    { title: t('permission.management.columns.permissionName'), key: 'permissionName', width: 150 },
+    { title: t('permission.management.columns.description'), key: 'description', width: 200 },
+  ],
+}))
 
 // 表格列定义
 const columns = computed<DataTableColumns<RoleCO>>(() => [
@@ -417,11 +460,51 @@ function handleDelete(role: RoleCO) {
   })
 }
 
-// 处理分配权限（简化实现，仅提示）
-function handleAssignPermissions(role: RoleCO) {
-  message.info(`${t('role.management.assignPermissions')}: ${role.roleName}`)
-  // TODO: 实现权限分配对话框
+// 打开分配权限对话框
+async function handleAssignPermissions(role: RoleCO) {
+  assigningRole.value = role
+  assignPermissionDialogVisible.value = true
+  // 如果模块选项为空，则加载模块列表
+  if (permissionModuleOptions.value.length === 0) {
+    await fetchPermissionModules()
+  }
 }
+
+// 处理分配权限提交
+async function handleAssignPermissionsConfirm(selectedIds: string[]) {
+  if (!assigningRole.value) {
+    return
+  }
+
+  assignPermissionLoading.value = true
+
+  try {
+    const response = await assignRolePermissionsApi(assigningRole.value.id, {
+      permissionIds: selectedIds,
+    })
+
+    if (response.success) {
+      message.success(t('role.management.messages.assignPermissionsSuccess'))
+      assignPermissionDialogVisible.value = false
+      await fetchRoles()
+    }
+    else {
+      message.error(response.errMessage || t('role.management.messages.assignPermissionsFailed'))
+    }
+  }
+  catch (err) {
+    const errorMessage = err instanceof Error ? err.message : t('role.management.messages.assignPermissionsFailed')
+    message.error(errorMessage)
+  }
+  finally {
+    assignPermissionLoading.value = false
+  }
+}
+
+// 获取已绑定的权限ID列表
+const boundPermissionIds = computed(() => {
+  return assigningRole.value?.permissionIds || []
+})
 
 // 初始化
 onMounted(() => {
@@ -470,6 +553,16 @@ onMounted(() => {
       :loading="formLoading"
       @submit="handleFormSubmit"
       @cancel="() => { formDialogVisible = false }"
+    />
+
+    <!-- 分配权限对话框 -->
+    <BindingDialog
+      v-model:visible="assignPermissionDialogVisible"
+      :title="assigningRole ? t('role.management.assignPermissionsHint', { roleName: assigningRole.roleName }) : t('role.management.assignPermissions')"
+      :bound-ids="boundPermissionIds"
+      :config="permissionBindingConfig"
+      :loading="assignPermissionLoading"
+      @confirm="handleAssignPermissionsConfirm"
     />
   </div>
 </template>

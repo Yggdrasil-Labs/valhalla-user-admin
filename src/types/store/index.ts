@@ -3,6 +3,7 @@
  */
 
 export * from './api'
+export * from './binding'
 export * from './permission'
 export * from './role'
 export * from './state'

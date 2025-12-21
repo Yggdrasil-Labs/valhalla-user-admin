@@ -204,6 +204,7 @@
       "editRole": "编辑角色",
       "deleteRole": "删除角色",
       "assignPermissions": "分配权限",
+      "assignPermissionsHint": "为角色 {roleName} 分配权限",
       "columns": {
         "id": "ID",
         "roleCode": "角色代码",
@@ -253,6 +254,7 @@
       "editPermission": "编辑权限",
       "deletePermission": "删除权限",
       "assignApis": "分配API",
+      "assignApisHint": "为权限 {permissionName} 分配API",
       "columns": {
         "id": "ID",
         "module": "模块",
@@ -329,6 +331,26 @@
       "confirm": {
         "deleteApi": "确定要删除API {apiName} 吗？"
       }
+    }
+  },
+  "binding": {
+    "title": {
+      "assignRoles": "为用户分配角色",
+      "assignPermissions": "为角色分配权限",
+      "assignApis": "为权限分配API"
+    },
+    "searchPlaceholder": "请输入{field}",
+    "selectedCount": "已选择 {count} 项",
+    "emptyState": {
+      "noData": "暂无数据",
+      "noSearchResults": "未找到匹配项",
+      "noFilterResults": "未找到符合条件的项"
+    },
+    "messages": {
+      "loadFailed": "加载数据失败",
+      "noChanges": "没有变更，无需保存",
+      "bindSuccess": "绑定成功",
+      "bindFailed": "绑定失败"
     }
   },
   "time": {

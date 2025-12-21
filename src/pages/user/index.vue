@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { DataTableColumns, DataTableSortState } from 'naive-ui'
-import type { AssignUserRoleRequest, CreateUserRequest, GetUsersParams, RoleCO, UpdateUserRequest, UserCO } from '@/types/store'
-import { NButton, NModal, NSelect, useDialog, useMessage } from 'naive-ui'
+import type { AssignUserRoleRequest, CreateUserRequest, GetUsersParams, UpdateUserRequest, UserCO } from '@/types/store'
+import type { BindingDialogConfig } from '@/types/store/binding'
+import { NButton, useDialog, useMessage } from 'naive-ui'
 import { h } from 'vue'
 import { getRolesApi } from '@/api/modules/role'
 import {
@@ -11,6 +12,7 @@ import {
   getUsersApi,
   updateUserApi,
 } from '@/api/modules/user'
+import { BindingDialog } from '@/components/BindingDialog'
 import { DataTable } from '@/components/DataTable'
 import { FormDialog } from '@/components/FormDialog'
 import { StatusSwitch } from '@/components/StatusSwitch'
@@ -59,10 +61,19 @@ const formLoading = ref(false)
 // 分配角色对话框
 const assignRoleDialogVisible = ref(false)
 const assigningUser = ref<UserCO | null>(null)
-const allRoles = ref<RoleCO[]>([])
-const selectedRoleIds = ref<string[]>([])
 const assignRoleLoading = ref(false)
-const loadingRoles = ref(false)
+
+// 绑定对话框配置
+const roleBindingConfig = computed<BindingDialogConfig>(() => ({
+  fetchData: getRolesApi,
+  searchField: 'roleName',
+  displayField: t('role.management.columns.roleName'),
+  columns: [
+    { title: t('role.management.columns.roleCode'), key: 'roleCode', width: 150 },
+    { title: t('role.management.columns.roleName'), key: 'roleName', width: 150 },
+    { title: t('role.management.columns.description'), key: 'description', width: 200 },
+  ],
+}))
 
 // 表格列定义
 const columns = computed<DataTableColumns<UserCO>>(() => [
@@ -495,41 +506,14 @@ async function handleStatusToggle(user: UserCO, newStatus: number) {
   }
 }
 
-// 获取所有角色列表（用于分配角色对话框）
-async function fetchAllRoles() {
-  loadingRoles.value = true
-  try {
-    const response = await getRolesApi({ pageSize: 1000 }) // 获取所有角色
-    if (response.success && response.data) {
-      allRoles.value = response.data
-    }
-    else {
-      message.error(response.errMessage || '获取角色列表失败')
-    }
-  }
-  catch (err) {
-    const errorMessage = err instanceof Error ? err.message : '获取角色列表失败'
-    message.error(errorMessage)
-  }
-  finally {
-    loadingRoles.value = false
-  }
-}
-
 // 打开分配角色对话框
-async function handleAssignRoles(user: UserCO) {
+function handleAssignRoles(user: UserCO) {
   assigningUser.value = user
-  selectedRoleIds.value = user.roleIds ? [...user.roleIds] : []
   assignRoleDialogVisible.value = true
-
-  // 如果还没有加载角色列表，则加载
-  if (allRoles.value.length === 0) {
-    await fetchAllRoles()
-  }
 }
 
 // 处理分配角色提交
-async function handleAssignRolesSubmit() {
+async function handleAssignRolesConfirm(selectedIds: string[]) {
   if (!assigningUser.value) {
     return
   }
@@ -538,7 +522,7 @@ async function handleAssignRolesSubmit() {
 
   try {
     const assignData: AssignUserRoleRequest = {
-      roleIds: selectedRoleIds.value,
+      roleIds: selectedIds,
     }
 
     const response = await assignUserRolesApi(assigningUser.value.id, assignData)
@@ -561,12 +545,9 @@ async function handleAssignRolesSubmit() {
   }
 }
 
-// 角色选项（用于下拉选择）
-const roleOptions = computed(() => {
-  return allRoles.value.map(role => ({
-    label: role.roleName,
-    value: role.id,
-  }))
+// 获取已绑定的角色ID列表
+const boundRoleIds = computed(() => {
+  return assigningUser.value?.roleIds || []
 })
 
 // 初始化
@@ -619,52 +600,14 @@ onMounted(() => {
     />
 
     <!-- 分配角色对话框 -->
-    <NModal
-      v-model:show="assignRoleDialogVisible"
-      preset="dialog"
-      :title="t('user.management.assignRoles')"
-      :mask-closable="false"
-      :close-on-esc="true"
-      :show-icon="false"
-      style="width: 600px"
-    >
-      <div v-if="assigningUser" class="assign-role-dialog">
-        <div class="dialog-content">
-          <p class="dialog-hint">
-            {{ t('user.management.assignRolesHint', { username: assigningUser.username }) }}
-          </p>
-          <n-form-item :label="t('user.management.form.roles')">
-            <NSelect
-              v-model:value="selectedRoleIds"
-              :options="roleOptions"
-              :loading="loadingRoles"
-              multiple
-              filterable
-              :placeholder="t('form.placeholder.pleaseSelect')"
-              style="width: 100%"
-            />
-          </n-form-item>
-        </div>
-      </div>
-
-      <template #action>
-        <n-space>
-          <NButton
-            :disabled="assignRoleLoading"
-            @click="assignRoleDialogVisible = false"
-          >
-            {{ t('button.cancel') }}
-          </NButton>
-          <NButton
-            type="primary"
-            :loading="assignRoleLoading"
-            @click="handleAssignRolesSubmit"
-          >
-            {{ t('button.confirm') }}
-          </NButton>
-        </n-space>
-      </template>
-    </NModal>
+    <BindingDialog
+      v-model:visible="assignRoleDialogVisible"
+      :title="assigningUser ? t('user.management.assignRolesHint', { username: assigningUser.username }) : t('user.management.assignRoles')"
+      :bound-ids="boundRoleIds"
+      :config="roleBindingConfig"
+      :loading="assignRoleLoading"
+      @confirm="handleAssignRolesConfirm"
+    />
   </div>
 </template>
 
@@ -687,17 +630,5 @@ onMounted(() => {
 .action-buttons {
   display: flex;
   gap: 8px;
-}
-
-.assign-role-dialog {
-  .dialog-content {
-    padding: 16px 0;
-
-    .dialog-hint {
-      margin-bottom: 16px;
-      color: var(--n-text-color-secondary);
-      font-size: 14px;
-    }
-  }
 }
 </style>

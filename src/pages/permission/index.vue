@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { DataTableColumns, DataTableSortState } from 'naive-ui'
 import type { CreatePermissionRequest, GetPermissionsParams, PermissionCO, UpdatePermissionRequest } from '@/types/store'
+import type { BindingDialogConfig } from '@/types/store/binding'
 import { NButton, useDialog, useMessage } from 'naive-ui'
 import { h } from 'vue'
-import {
-  createPermissionApi,
-  deletePermissionApi,
-  getPermissionsApi,
-  updatePermissionApi,
-} from '@/api/modules/permission'
+import { getApisApi } from '@/api/modules/api'
+import { assignPermissionApisApi, createPermissionApi, deletePermissionApi, getPermissionsApi, updatePermissionApi } from '@/api/modules/permission'
+
+import { BindingDialog } from '@/components/BindingDialog'
 import { DataTable } from '@/components/DataTable'
 import { FormDialog } from '@/components/FormDialog'
 import { useI18nHelper } from '@/composables/useI18n'
@@ -52,6 +51,68 @@ const formDialogVisible = ref(false)
 const formDialogTitle = ref('')
 const editingPermission = ref<PermissionCO | null>(null)
 const formLoading = ref(false)
+
+// 分配API对话框
+const assignApiDialogVisible = ref(false)
+const assigningPermission = ref<PermissionCO | null>(null)
+const assignApiLoading = ref(false)
+
+// HTTP 方法选项（用于筛选）
+const httpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
+const apiMethodOptions = computed(() => {
+  return httpMethods.map(method => ({ label: method, value: method }))
+})
+
+// 获取 HTTP 方法的标签类型
+function getMethodTagType(method: string): 'default' | 'error' | 'info' | 'success' | 'warning' {
+  const methodUpper = method.toUpperCase()
+  switch (methodUpper) {
+    case 'GET':
+      return 'info'
+    case 'POST':
+      return 'success'
+    case 'PUT':
+      return 'warning'
+    case 'DELETE':
+      return 'error'
+    case 'PATCH':
+      return 'default'
+    default:
+      return 'default'
+  }
+}
+
+// 绑定对话框配置
+const apiBindingConfig = computed<BindingDialogConfig>(() => ({
+  fetchData: getApisApi,
+  searchField: ['apiCode', 'resourcePath'],
+  filterField: 'resourceMethod',
+  filterOptions: apiMethodOptions.value,
+  displayField: t('api.management.columns.apiCode'),
+  columns: [
+    { title: t('api.management.columns.apiCode'), key: 'apiCode', width: 150 },
+    { title: t('api.management.columns.apiName'), key: 'apiName', width: 150 },
+    { title: t('api.management.columns.resourcePath'), key: 'resourcePath', width: 250 },
+    {
+      title: t('api.management.columns.resourceMethod'),
+      key: 'resourceMethod',
+      width: 120,
+      render: (row: any) => {
+        return h('span', {
+          style: {
+            padding: '2px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 500,
+            backgroundColor: getMethodTagType(row.resourceMethod) === 'info' ? '#e0f2fe' : getMethodTagType(row.resourceMethod) === 'success' ? '#dcfce7' : getMethodTagType(row.resourceMethod) === 'warning' ? '#fef3c7' : getMethodTagType(row.resourceMethod) === 'error' ? '#fee2e2' : '#f3f4f6',
+            color: getMethodTagType(row.resourceMethod) === 'info' ? '#0369a1' : getMethodTagType(row.resourceMethod) === 'success' ? '#166534' : getMethodTagType(row.resourceMethod) === 'warning' ? '#92400e' : getMethodTagType(row.resourceMethod) === 'error' ? '#991b1b' : '#374151',
+          },
+        }, row.resourceMethod)
+      },
+    },
+    { title: t('api.management.columns.description'), key: 'description', width: 200 },
+  ],
+}))
 
 // 表格列定义
 const columns = computed<DataTableColumns<PermissionCO>>(() => [
@@ -444,11 +505,47 @@ function handleDelete(permission: PermissionCO) {
   })
 }
 
-// 处理分配API（简化实现，仅提示）
+// 打开分配API对话框
 function handleAssignApis(permission: PermissionCO) {
-  message.info(`${t('permission.management.assignApis')}: ${permission.permissionName}`)
-  // TODO: 实现API分配对话框
+  assigningPermission.value = permission
+  assignApiDialogVisible.value = true
 }
+
+// 处理分配API提交
+async function handleAssignApisConfirm(selectedIds: string[]) {
+  if (!assigningPermission.value) {
+    return
+  }
+
+  assignApiLoading.value = true
+
+  try {
+    const response = await assignPermissionApisApi(assigningPermission.value.id, {
+      apiIds: selectedIds,
+    })
+
+    if (response.success) {
+      message.success(t('permission.management.messages.assignApisSuccess'))
+      assignApiDialogVisible.value = false
+      await fetchPermissions()
+    }
+    else {
+      message.error(response.errMessage || t('permission.management.messages.assignApisFailed'))
+    }
+  }
+  catch (err) {
+    const errorMessage = err instanceof Error ? err.message : t('permission.management.messages.assignApisFailed')
+    message.error(errorMessage)
+  }
+  finally {
+    assignApiLoading.value = false
+  }
+}
+
+// 获取已绑定的API ID列表
+const boundApiIds = computed(() => {
+  return assigningPermission.value?.apiIds || []
+})
 
 // 初始化
 onMounted(() => {
@@ -497,6 +594,16 @@ onMounted(() => {
       :loading="formLoading"
       @submit="handleFormSubmit"
       @cancel="() => { formDialogVisible = false }"
+    />
+
+    <!-- 分配API对话框 -->
+    <BindingDialog
+      v-model:visible="assignApiDialogVisible"
+      :title="assigningPermission ? t('permission.management.assignApisHint', { permissionName: assigningPermission.permissionName }) : t('permission.management.assignApis')"
+      :bound-ids="boundApiIds"
+      :config="apiBindingConfig"
+      :loading="assignApiLoading"
+      @confirm="handleAssignApisConfirm"
     />
   </div>
 </template>
