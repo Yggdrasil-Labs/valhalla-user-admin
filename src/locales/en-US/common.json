@@ -166,8 +166,11 @@
         "phone": "Phone",
         "nickname": "Nickname",
         "avatar": "Avatar URL",
-        "status": "Status"
+        "status": "Status",
+        "roles": "Roles"
       },
+      "assignRoles": "Assign Roles",
+      "assignRolesHint": "Assign roles to user {username}",
       "status": {
         "enabled": "Enabled",
         "disabled": "Disabled"
@@ -181,7 +184,9 @@
         "deleteFailed": "Failed to delete user",
         "statusChangeSuccess": "Status updated successfully",
         "statusChangeFailed": "Failed to update status",
-        "loadFailed": "Failed to load user list"
+        "loadFailed": "Failed to load user list",
+        "assignRolesSuccess": "Roles assigned successfully",
+        "assignRolesFailed": "Failed to assign roles"
       },
       "confirm": {
         "deleteUser": "Are you sure you want to delete user {username}?",

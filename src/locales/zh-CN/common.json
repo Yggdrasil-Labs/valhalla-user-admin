@@ -166,8 +166,11 @@
         "phone": "手机号",
         "nickname": "昵称",
         "avatar": "头像URL",
-        "status": "状态"
+        "status": "状态",
+        "roles": "角色"
       },
+      "assignRoles": "分配角色",
+      "assignRolesHint": "为用户 {username} 分配角色",
       "status": {
         "enabled": "启用",
         "disabled": "禁用"
@@ -181,7 +184,9 @@
         "deleteFailed": "删除用户失败",
         "statusChangeSuccess": "状态更新成功",
         "statusChangeFailed": "状态更新失败",
-        "loadFailed": "加载用户列表失败"
+        "loadFailed": "加载用户列表失败",
+        "assignRolesSuccess": "分配角色成功",
+        "assignRolesFailed": "分配角色失败"
       },
       "confirm": {
         "deleteUser": "确定要删除用户 {username} 吗？",
