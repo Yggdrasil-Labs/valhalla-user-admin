@@ -7,6 +7,7 @@ import { h } from 'vue'
 import { getPermissionsApi } from '@/api/modules/permission'
 import { assignRolePermissionsApi, createRoleApi, deleteRoleApi, getRolesApi, updateRoleApi } from '@/api/modules/role'
 
+import { Card, EmptyState, ErrorState, LoadingState, PageContainer, PageHeader } from '@/components'
 import { BindingDialog } from '@/components/BindingDialog'
 import { DataTable } from '@/components/DataTable'
 import { FormDialog } from '@/components/FormDialog'
@@ -513,12 +514,41 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="role-management-page">
-    <div class="page-content">
+  <PageContainer>
+    <PageHeader
+      :title="t('role.management.title')"
+      :description="t('role.management.description')"
+    >
+      <template #actions>
+        <NButton
+          type="primary"
+          @click="handleAdd"
+        >
+          {{ t('role.management.addRole') }}
+        </NButton>
+      </template>
+    </PageHeader>
+
+    <Card>
+      <LoadingState v-if="loading" type="skeleton" :rows="5" />
+      <ErrorState
+        v-else-if="error"
+        :title="t('role.management.messages.loadFailed')"
+        :description="error"
+        @retry="fetchRoles"
+      />
+      <EmptyState
+        v-else-if="roles.length === 0"
+        :title="t('role.management.empty.title')"
+        :description="t('role.management.empty.description')"
+        :action-text="t('role.management.addRole')"
+        @action="handleAdd"
+      />
       <DataTable
+        v-else
         :columns="columns"
         :data="roles"
-        :loading="loading"
+        :loading="false"
         :pagination="pagination"
         :searchable="true"
         :search-value="searchValue"
@@ -527,22 +557,13 @@ onMounted(() => {
         :filter-options="filterOptions"
         :filter-value="filterValue"
         :sort-state="sortState"
-        :error="error"
+        :error="null"
         :filter-width="200"
         @search="handleSearch"
         @filter="handleFilter"
         @update:sorter="handleSorterChange"
-      >
-        <template #toolbar>
-          <NButton
-            type="primary"
-            @click="handleAdd"
-          >
-            {{ t('role.management.addRole') }}
-          </NButton>
-        </template>
-      </DataTable>
-    </div>
+      />
+    </Card>
 
     <!-- 表单对话框 -->
     <FormDialog
@@ -564,27 +585,28 @@ onMounted(() => {
       :loading="assignPermissionLoading"
       @confirm="handleAssignPermissionsConfirm"
     />
-  </div>
+  </PageContainer>
 </template>
 
 <style scoped lang="scss">
-.role-management-page {
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.page-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+@use 'sass:map';
+@use '@/assets/scss/base/variables' as *;
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: map.get($spacings, 2); // 8px
+
+  :deep(.n-button) {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: map.get($border-radius, base); // 6px
+    transition: all map.get($transitions, fast);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: map.get($shadows, sm);
+    }
+  }
 }
 </style>

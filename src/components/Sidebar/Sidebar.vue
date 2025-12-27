@@ -194,12 +194,13 @@ defineExpose({
   top: 64px; // 导航栏高度
   bottom: 0;
   width: 240px;
-  background-color: map.get($colors, white);
-  border-right: 1px solid map.get($colors, gray-200);
+  background: map.get($colors, surface);
+  border-right: 1px solid map.get($colors, border);
+  box-shadow: map.get($shadows, sm);
   overflow-y: auto;
   overflow-x: hidden;
-  z-index: 100;
-  transition: width 0.3s ease;
+  z-index: map.get($z-indexes, sticky);
+  transition: width map.get($transitions, base);
   display: flex;
   flex-direction: column;
 
@@ -208,15 +209,22 @@ defineExpose({
   }
 
   .sidebar-header {
-    padding: 12px;
-    border-bottom: 1px solid map.get($colors, gray-200);
+    padding: map.get($spacings, 3); // 12px
+    border-bottom: 1px solid map.get($colors, border);
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    height: 56px;
     flex-shrink: 0;
 
     .collapse-button {
       width: 32px;
       height: 32px;
+      transition: all map.get($transitions, fast);
+
+      &:hover {
+        background: map.get($colors, gray-100);
+      }
     }
   }
 
@@ -228,6 +236,23 @@ defineExpose({
     flex: 1;
     border-right: none;
     overflow-y: auto;
+    padding: map.get($spacings, 2); // 8px
+
+    .n-menu-item {
+      border-radius: map.get($border-radius, base); // 6px
+      margin-bottom: map.get($spacings, 1); // 4px
+      transition: all map.get($transitions, fast);
+
+      &:hover {
+        background: map.get($colors, gray-100);
+      }
+
+      &.n-menu-item--selected {
+        background: map.get($colors, primary-light);
+        color: map.get($colors, primary);
+        font-weight: map.get($font-weights, semibold);
+      }
+    }
   }
 }
 

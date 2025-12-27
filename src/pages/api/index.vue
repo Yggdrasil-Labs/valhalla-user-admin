@@ -9,6 +9,7 @@ import {
   getApisApi,
   updateApiApi,
 } from '@/api/modules/api'
+import { Card, EmptyState, ErrorState, LoadingState, PageContainer, PageHeader } from '@/components'
 import { DataTable } from '@/components/DataTable'
 import { FormDialog } from '@/components/FormDialog'
 import { useI18nHelper } from '@/composables/useI18n'
@@ -464,12 +465,41 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="api-management-page">
-    <div class="page-content">
+  <PageContainer>
+    <PageHeader
+      :title="t('api.management.title')"
+      :description="t('api.management.description')"
+    >
+      <template #actions>
+        <NButton
+          type="primary"
+          @click="handleAdd"
+        >
+          {{ t('api.management.addApi') }}
+        </NButton>
+      </template>
+    </PageHeader>
+
+    <Card>
+      <LoadingState v-if="loading" type="skeleton" :rows="5" />
+      <ErrorState
+        v-else-if="error"
+        :title="t('api.management.messages.loadFailed')"
+        :description="error"
+        @retry="fetchApis"
+      />
+      <EmptyState
+        v-else-if="apis.length === 0"
+        :title="t('api.management.empty.title')"
+        :description="t('api.management.empty.description')"
+        :action-text="t('api.management.addApi')"
+        @action="handleAdd"
+      />
       <DataTable
+        v-else
         :columns="columns"
         :data="apis"
-        :loading="loading"
+        :loading="false"
         :pagination="pagination"
         :searchable="true"
         :search-value="searchValue"
@@ -478,22 +508,13 @@ onMounted(() => {
         :filter-options="filterOptions"
         :filter-value="filterValue"
         :sort-state="sortState"
-        :error="error"
+        :error="null"
         :filter-width="200"
         @search="handleSearch"
         @filter="handleFilter"
         @update:sorter="handleSorterChange"
-      >
-        <template #toolbar>
-          <NButton
-            type="primary"
-            @click="handleAdd"
-          >
-            {{ t('api.management.addApi') }}
-          </NButton>
-        </template>
-      </DataTable>
-    </div>
+      />
+    </Card>
 
     <!-- 表单对话框 -->
     <FormDialog
@@ -505,27 +526,28 @@ onMounted(() => {
       @submit="handleFormSubmit"
       @cancel="() => { formDialogVisible = false }"
     />
-  </div>
+  </PageContainer>
 </template>
 
 <style scoped lang="scss">
-.api-management-page {
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.page-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+@use 'sass:map';
+@use '@/assets/scss/base/variables' as *;
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: map.get($spacings, 2); // 8px
+
+  :deep(.n-button) {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: map.get($border-radius, base); // 6px
+    transition: all map.get($transitions, fast);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: map.get($shadows, sm);
+    }
+  }
 }
 </style>

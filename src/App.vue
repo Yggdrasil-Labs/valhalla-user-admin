@@ -59,7 +59,7 @@ onMounted(() => {
 
 .app-main {
   flex: 1;
-  padding: 24px;
+  padding: 0;
   height: calc(100vh - 64px);
   transition: margin-left 0.3s ease;
   width: calc(100vw - var(--sidebar-width, 240px));
@@ -73,7 +73,7 @@ onMounted(() => {
 // 响应式设计
 @media (max-width: 768px) {
   .app-main {
-    padding: 16px;
+    padding: 0;
     width: calc(100vw - var(--sidebar-width, 64px));
     max-width: calc(100vw - var(--sidebar-width, 64px));
   }

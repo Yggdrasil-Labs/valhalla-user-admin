@@ -47,3 +47,5 @@ src/types/typed-router.d.ts
 .cursor/commands/
 openspec/*
 AGENTS.md
+
+.shared/*

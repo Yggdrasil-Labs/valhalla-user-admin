@@ -7,6 +7,7 @@ import { h } from 'vue'
 import { getApisApi } from '@/api/modules/api'
 import { assignPermissionApisApi, createPermissionApi, deletePermissionApi, getPermissionsApi, updatePermissionApi } from '@/api/modules/permission'
 
+import { Card, EmptyState, ErrorState, LoadingState, PageContainer, PageHeader } from '@/components'
 import { BindingDialog } from '@/components/BindingDialog'
 import { DataTable } from '@/components/DataTable'
 import { FormDialog } from '@/components/FormDialog'
@@ -554,12 +555,41 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="permission-management-page">
-    <div class="page-content">
+  <PageContainer>
+    <PageHeader
+      :title="t('permission.management.title')"
+      :description="t('permission.management.description')"
+    >
+      <template #actions>
+        <NButton
+          type="primary"
+          @click="handleAdd"
+        >
+          {{ t('permission.management.addPermission') }}
+        </NButton>
+      </template>
+    </PageHeader>
+
+    <Card>
+      <LoadingState v-if="loading" type="skeleton" :rows="5" />
+      <ErrorState
+        v-else-if="error"
+        :title="t('permission.management.messages.loadFailed')"
+        :description="error"
+        @retry="fetchPermissions"
+      />
+      <EmptyState
+        v-else-if="permissions.length === 0"
+        :title="t('permission.management.empty.title')"
+        :description="t('permission.management.empty.description')"
+        :action-text="t('permission.management.addPermission')"
+        @action="handleAdd"
+      />
       <DataTable
+        v-else
         :columns="columns"
         :data="permissions"
-        :loading="loading"
+        :loading="false"
         :pagination="pagination"
         :searchable="true"
         :search-value="searchValue"
@@ -568,22 +598,13 @@ onMounted(() => {
         :filter-options="moduleOptions"
         :filter-value="filterValue"
         :sort-state="sortState"
-        :error="error"
+        :error="null"
         :filter-width="200"
         @search="handleSearch"
         @filter="handleFilter"
         @update:sorter="handleSorterChange"
-      >
-        <template #toolbar>
-          <NButton
-            type="primary"
-            @click="handleAdd"
-          >
-            {{ t('permission.management.addPermission') }}
-          </NButton>
-        </template>
-      </DataTable>
-    </div>
+      />
+    </Card>
 
     <!-- 表单对话框 -->
     <FormDialog
@@ -605,27 +626,28 @@ onMounted(() => {
       :loading="assignApiLoading"
       @confirm="handleAssignApisConfirm"
     />
-  </div>
+  </PageContainer>
 </template>
 
 <style scoped lang="scss">
-.permission-management-page {
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.page-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+@use 'sass:map';
+@use '@/assets/scss/base/variables' as *;
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: map.get($spacings, 2); // 8px
+
+  :deep(.n-button) {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: map.get($border-radius, base); // 6px
+    transition: all map.get($transitions, fast);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: map.get($shadows, sm);
+    }
+  }
 }
 </style>

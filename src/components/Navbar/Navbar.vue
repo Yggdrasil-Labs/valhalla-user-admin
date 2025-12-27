@@ -32,19 +32,20 @@ import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  background: rgba(map.get($colors, white), 0.95);
+  z-index: map.get($z-indexes, fixed);
+  height: 64px;
+  background: rgba(map.get($colors, surface), 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid map.get($colors, gray-200);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  border-bottom: 1px solid map.get($colors, border);
+  box-shadow: map.get($shadows, sm);
+  transition: all map.get($transitions, base);
 }
 
 .navbar-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 24px; // 1.5rem = 24px
-  height: 64px;
+  padding: 0 map.get($spacings, 6); // 24px
+  height: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -55,17 +56,18 @@ import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
   .brand-title {
     margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: map.get($colors, gray-800);
-    transition: color 0.3s ease;
+    font-size: map.get($font-sizes, xl); // 20px
+    font-weight: map.get($font-weights, semibold);
+    color: map.get($colors, text-primary);
+    letter-spacing: -0.02em;
+    transition: color map.get($transitions, base);
   }
 }
 
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: map.get($spacings, 2); // 8px (0.5rem)
+  gap: map.get($spacings, 4); // 16px
   flex: 0 0 auto;
 }
 
@@ -73,18 +75,19 @@ import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
   display: flex;
   align-items: center;
 }
+
 // 响应式设计
 @media (max-width: 768px) {
   .navbar-container {
-    padding: 0 map.get($spacings, 4); // 16px (1rem)
+    padding: 0 map.get($spacings, 4); // 16px
   }
 
   .brand-title {
-    font-size: map.get($font-sizes, base); // 16px (1rem) - 保留 rem 便于整体缩放
+    font-size: map.get($font-sizes, base); // 16px
   }
 
   .navbar-actions {
-    gap: map.get($spacings, 1); // 4px (0.25rem)
+    gap: map.get($spacings, 2); // 8px
   }
 }
 </style>

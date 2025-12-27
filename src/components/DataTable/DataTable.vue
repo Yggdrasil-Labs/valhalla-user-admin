@@ -52,6 +52,8 @@ interface Props {
   filterWidth?: string | number
   /** 表格高度，支持数字（px）或 'auto' */
   height?: number | 'auto'
+  /** 是否独立模式（单独使用，显示边框、圆角、阴影） */
+  standalone?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -69,6 +71,7 @@ const props = withDefaults(defineProps<Props>(), {
   resizable: true,
   filterWidth: 200,
   height: 600,
+  standalone: false,
 })
 
 const emit = defineEmits<{
@@ -160,7 +163,7 @@ const resizableColumns = computed(() => {
 <template>
   <div class="data-table-wrapper">
     <!-- 整体容器：包含 toolbar 和表格 -->
-    <div class="data-table-container">
+    <div class="data-table-container" :class="{ 'data-table-container--standalone': standalone }">
       <!-- 搜索和筛选栏 -->
       <div v-if="searchable || filterable || $slots.toolbar" class="data-table-toolbar">
         <div class="toolbar-left">
@@ -215,7 +218,7 @@ const resizableColumns = computed(() => {
           :sort="sortStateModel"
           :sort-mode="sortMode"
           :remote="false"
-          :max-height="height === 'auto' ? undefined : height"
+          :max-height="height === 'auto' ? '100%' : height"
           @update:sorter="handleSorterChange"
         />
       </div>
@@ -229,24 +232,80 @@ const resizableColumns = computed(() => {
 
 .data-table-wrapper {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; // 允许 flex 子元素收缩
 }
 
 .data-table-container {
-  padding: 16px;
-  background-color: map.get($colors, white);
-  border-radius: 8px;
+  // 默认模式（嵌入在 Card 等容器内）：无边框、无圆角、无阴影、无背景
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  min-height: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; // 允许 flex 子元素收缩
+
+  .data-table-toolbar {
+    padding: map.get($spacings, 6); // 24px
+    padding-bottom: map.get($spacings, 4); // 16px
+    margin-bottom: 0;
+  }
+
+  .data-table-content {
+    padding: map.get($spacings, 4) map.get($spacings, 6) map.get($spacings, 6); // 16px 24px 24px
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; // 允许 flex 子元素收缩
+    overflow: hidden;
+  }
+
+  // 独立模式（单独使用）：显示边框、圆角、阴影、背景
+  &.data-table-container--standalone {
+    padding: map.get($spacings, 6); // 24px
+    background: map.get($colors, surface);
+    border-radius: map.get($border-radius, md); // 8px
+    border: 1px solid map.get($colors, border);
+    box-shadow: map.get($shadows, base);
+    min-height: 400px;
+
+    .data-table-toolbar {
+      padding: 0;
+      padding-bottom: map.get($spacings, 4); // 16px
+      margin-bottom: map.get($spacings, 4); // 16px
+    }
+
+    .data-table-content {
+      padding-top: map.get($spacings, 4); // 16px
+      padding-left: 0;
+      padding-right: 0;
+      padding-bottom: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0; // 允许 flex 子元素收缩
+      overflow: hidden;
+    }
+  }
 
   .data-table-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-    padding: 0;
+    gap: map.get($spacings, 4); // 16px
+    border-bottom: 1px solid map.get($colors, border);
 
     .toolbar-left {
       display: flex;
-      gap: 16px;
+      gap: map.get($spacings, 4); // 16px
       align-items: center;
       flex: 1;
     }
@@ -266,6 +325,39 @@ const resizableColumns = computed(() => {
     .search-button {
       flex-shrink: 0;
     }
+  }
+}
+
+// 优化表格样式
+:deep(.n-data-table) {
+  .n-data-table-tr {
+    height: 48px; // 紧凑模式，提升信息密度
+    transition: background map.get($transitions, fast);
+
+    &:hover {
+      background: map.get($colors, gray-100);
+    }
+  }
+
+  .n-data-table-th {
+    background: map.get($colors, gray-50);
+    color: map.get($colors, text-primary);
+    font-weight: map.get($font-weights, semibold);
+    font-size: map.get($font-sizes, sm); // 14px
+    padding: 12px 16px;
+    border-bottom: 1px solid map.get($colors, border);
+  }
+
+  .n-data-table-td {
+    padding: 12px 16px;
+    font-size: map.get($font-sizes, sm); // 14px
+    color: map.get($colors, text-primary);
+    border-bottom: 1px solid map.get($colors, border);
+  }
+
+  // 斑马纹（可选）
+  .n-data-table-tbody .n-data-table-tr:nth-child(even) {
+    background: map.get($colors, gray-50);
   }
 }
 </style>
