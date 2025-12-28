@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DataTableColumns, DataTableSortState } from 'naive-ui'
+import { useElementSize, useResizeObserver } from '@vueuse/core'
 import { useI18nHelper } from '@/composables/useI18n'
 
 type SortState = DataTableSortState | DataTableSortState[] | null
@@ -70,7 +71,7 @@ const props = withDefaults(defineProps<Props>(), {
   error: null,
   resizable: true,
   filterWidth: 200,
-  height: 600,
+  height: 'auto',
   standalone: false,
 })
 
@@ -158,14 +159,86 @@ const resizableColumns = computed(() => {
     }
   })
 })
+
+// 容器引用，用于计算高度
+const containerRef = ref<HTMLElement | null>(null)
+const contentRef = ref<HTMLElement | null>(null)
+const tableWrapRef = ref<HTMLElement | null>(null)
+const toolbarRef = ref<HTMLElement | null>(null)
+const headerEl = ref<HTMLElement | null>(null)
+const paginationEl = ref<HTMLElement | null>(null)
+
+function syncTableInnerEls() {
+  const root = tableWrapRef.value
+  if (!root) {
+    headerEl.value = null
+    paginationEl.value = null
+    return
+  }
+  headerEl.value = root.querySelector('.n-data-table-base-table-header') as HTMLElement | null
+  paginationEl.value = root.querySelector('.n-data-table-pagination') as HTMLElement | null
+}
+
+onMounted(() => {
+  syncTableInnerEls()
+  nextTick(syncTableInnerEls)
+})
+
+useResizeObserver(tableWrapRef, () => {
+  syncTableInnerEls()
+})
+
+useResizeObserver(containerRef, () => {
+  syncTableInnerEls()
+})
+
+const { height: contentHeight } = useElementSize(contentRef)
+const { height: headerHeight } = useElementSize(headerEl)
+const { height: paginationHeight } = useElementSize(paginationEl)
+
+const contentPaddingY = computed(() => {
+  if (!contentRef.value) {
+    return 0
+  }
+  const style = getComputedStyle(contentRef.value)
+  const pt = Number.parseFloat(style.paddingTop) || 0
+  const pb = Number.parseFloat(style.paddingBottom) || 0
+  return pt + pb
+})
+
+// 计算表格 body 的 max-height（用于 Naive UI 内部滚动）
+const resolvedMaxHeight = computed<number | undefined>(() => {
+  // 显式传入数字时，直接使用该高度（兼容旧用法）
+  if (typeof props.height === 'number') {
+    return props.height
+  }
+
+  // 使用 content 区域高度作为可用空间（更稳定，不依赖 padding 的硬编码）
+  const baseH = contentHeight.value
+  if (!baseH) {
+    return undefined
+  }
+
+  // 预留表头和分页高度（否则会被 Card 的 overflow 裁掉）
+  const reserved = (headerHeight.value || 0) + (paginationHeight.value || 0)
+  const innerH = baseH - contentPaddingY.value
+  const bodyH = innerH - reserved
+
+  // 小于 0 时交给外层滚提醒，但避免返回 0 导致 Naive scrollbar 判定异常
+  return bodyH > 80 ? bodyH : 80
+})
 </script>
 
 <template>
-  <div class="data-table-wrapper">
+  <div ref="containerRef" class="data-table-wrapper">
     <!-- 整体容器：包含 toolbar 和表格 -->
     <div class="data-table-container" :class="{ 'data-table-container--standalone': standalone }">
       <!-- 搜索和筛选栏 -->
-      <div v-if="searchable || filterable || $slots.toolbar" class="data-table-toolbar">
+      <div
+        v-if="searchable || filterable || $slots.toolbar"
+        ref="toolbarRef"
+        class="data-table-toolbar"
+      >
         <div class="toolbar-left">
           <!-- 筛选器 -->
           <div v-if="filterable && filterOptions" class="filter-box">
@@ -207,20 +280,22 @@ const resizableColumns = computed(() => {
       </div>
 
       <!-- 数据表格 -->
-      <div class="data-table-content">
-        <n-data-table
-          :columns="resizableColumns"
-          :data="data"
-          :loading="loading"
-          :pagination="pagination"
-          :bordered="bordered"
-          :striped="striped"
-          :sort="sortStateModel"
-          :sort-mode="sortMode"
-          :remote="false"
-          :max-height="height === 'auto' ? '100%' : height"
-          @update:sorter="handleSorterChange"
-        />
+      <div ref="contentRef" class="data-table-content">
+        <div ref="tableWrapRef" class="data-table-inner">
+          <n-data-table
+            :columns="resizableColumns"
+            :data="data"
+            :loading="loading"
+            :pagination="pagination"
+            :bordered="bordered"
+            :striped="striped"
+            :sort="sortStateModel"
+            :sort-mode="sortMode"
+            :remote="false"
+            :max-height="resolvedMaxHeight"
+            @update:sorter="handleSorterChange"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -233,7 +308,7 @@ const resizableColumns = computed(() => {
 .data-table-wrapper {
   width: 100%;
   height: 100%;
-  display: flex;
+  display: block;
   flex-direction: column;
   flex: 1;
   min-height: 0; // 允许 flex 子元素收缩
@@ -265,7 +340,7 @@ const resizableColumns = computed(() => {
     display: flex;
     flex-direction: column;
     min-height: 0; // 允许 flex 子元素收缩
-    overflow: hidden;
+    overflow: auto; // 兜底：若内部计算异常，允许外层滚动避免内容被裁剪
   }
 
   // 独立模式（单独使用）：显示边框、圆角、阴影、背景
@@ -292,7 +367,7 @@ const resizableColumns = computed(() => {
       display: flex;
       flex-direction: column;
       min-height: 0; // 允许 flex 子元素收缩
-      overflow: hidden;
+      overflow: auto; // 兜底：若内部计算异常，允许外层滚动避免内容被裁剪
     }
   }
 
@@ -330,6 +405,11 @@ const resizableColumns = computed(() => {
 
 // 优化表格样式
 :deep(.n-data-table) {
+  // 确保表格容器能够正确计算高度
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
   .n-data-table-tr {
     height: 48px; // 紧凑模式，提升信息密度
     transition: background map.get($transitions, fast);
