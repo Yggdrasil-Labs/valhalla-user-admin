@@ -183,9 +183,11 @@
       "columns": {
         "id": "ID",
         "apiCode": "接口代码",
+        "version": "版本",
         "apiName": "接口名称",
         "resourcePath": "资源路径",
         "resourceMethod": "HTTP方法",
+        "status": "状态",
         "description": "描述",
         "createTime": "创建时间",
         "updateTime": "更新时间",
@@ -193,11 +195,18 @@
       },
       "form": {
         "apiCode": "接口代码",
+        "version": "版本",
         "apiName": "接口名称",
         "resourcePath": "资源路径",
         "resourceMethod": "HTTP方法",
+        "status": "状态",
         "description": "描述",
         "metadata": "扩展信息"
+      },
+      "status": {
+        "enabled": "启用",
+        "deprecated": "废弃",
+        "disabled": "禁用"
       },
       "messages": {
         "createSuccess": "创建API成功",
@@ -206,7 +215,8 @@
         "updateFailed": "更新API失败",
         "deleteSuccess": "删除API成功",
         "deleteFailed": "删除API失败",
-        "loadFailed": "加载API列表失败"
+        "loadFailed": "加载API列表失败",
+        "cannotDeleteNonDisabled": "只有禁用状态的接口才能删除"
       },
       "confirm": {
         "deleteApi": "确定要删除API {apiName} 吗？"

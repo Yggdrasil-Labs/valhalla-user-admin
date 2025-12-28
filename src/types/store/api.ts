@@ -8,9 +8,11 @@ import type { ApiResponse } from '@/types/api'
 export interface ApiCO {
   id: string
   apiCode: string
+  version?: string // 接口版本
   apiName: string
   resourcePath: string
   resourceMethod: string // HTTP方法（GET、POST、PUT、DELETE等）
+  status?: string // 接口状态
   description?: string
   metadata?: string // 扩展信息（JSON）
   createTime?: string
@@ -23,6 +25,8 @@ export interface CreateApiRequest {
   apiName: string // 必填
   resourcePath: string // 必填
   resourceMethod: string // 必填，HTTP方法（GET、POST、PUT、DELETE等）
+  version?: string // 接口版本（可选，如未指定则默认为 "v1"）
+  status?: string // 接口状态（可选，如未指定则默认为 "ENABLED"）
   description?: string
   metadata?: string // 扩展信息（JSON）
 }
@@ -31,6 +35,7 @@ export interface CreateApiRequest {
 export interface UpdateApiRequest {
   id: string // 必填
   apiName: string // 必填
+  status?: string // 接口状态（可选，支持状态变更）
   description?: string
   metadata?: string // 扩展信息（JSON）
 }

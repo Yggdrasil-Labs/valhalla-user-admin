@@ -183,9 +183,11 @@
       "columns": {
         "id": "ID",
         "apiCode": "API Code",
+        "version": "Version",
         "apiName": "API Name",
         "resourcePath": "Resource Path",
         "resourceMethod": "HTTP Method",
+        "status": "Status",
         "description": "Description",
         "createTime": "Create Time",
         "updateTime": "Update Time",
@@ -193,11 +195,18 @@
       },
       "form": {
         "apiCode": "API Code",
+        "version": "Version",
         "apiName": "API Name",
         "resourcePath": "Resource Path",
         "resourceMethod": "HTTP Method",
+        "status": "Status",
         "description": "Description",
         "metadata": "Metadata"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "deprecated": "Deprecated",
+        "disabled": "Disabled"
       },
       "messages": {
         "createSuccess": "API created successfully",
@@ -206,7 +215,8 @@
         "updateFailed": "Failed to update API",
         "deleteSuccess": "API deleted successfully",
         "deleteFailed": "Failed to delete API",
-        "loadFailed": "Failed to load API list"
+        "loadFailed": "Failed to load API list",
+        "cannotDeleteNonDisabled": "Only disabled APIs can be deleted"
       },
       "confirm": {
         "deleteApi": "Are you sure you want to delete API {apiName}?"

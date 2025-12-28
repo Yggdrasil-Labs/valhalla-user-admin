@@ -57,6 +57,13 @@ const formLoading = ref(false)
 // HTTP 方法选项
 const httpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
 
+// API 状态选项
+const apiStatusOptions = [
+  { label: t('api.management.status.enabled'), value: 'ENABLED' },
+  { label: t('api.management.status.deprecated'), value: 'DEPRECATED' },
+  { label: t('api.management.status.disabled'), value: 'DISABLED' },
+]
+
 // 表格列定义
 const columns = computed<DataTableColumns<ApiCO>>(() => [
   {
@@ -64,6 +71,12 @@ const columns = computed<DataTableColumns<ApiCO>>(() => [
     key: 'apiCode',
     sorter: 'default',
     width: 150,
+    align: 'left',
+  },
+  {
+    title: t('api.management.columns.version'),
+    key: 'version',
+    width: 100,
     align: 'left',
   },
   {
@@ -89,6 +102,36 @@ const columns = computed<DataTableColumns<ApiCO>>(() => [
       return h(NTag, {
         type: getMethodTagType(row.resourceMethod),
       }, { default: () => row.resourceMethod })
+    },
+  },
+  {
+    title: t('api.management.columns.status'),
+    key: 'status',
+    width: 100,
+    align: 'center',
+    render: (row: ApiCO) => {
+      let statusType: 'success' | 'warning' | 'default' = 'default'
+      let statusText = ''
+
+      if (row.status === 'ENABLED') {
+        statusType = 'success'
+        statusText = t('api.management.status.enabled')
+      }
+      else if (row.status === 'DEPRECATED') {
+        statusType = 'warning'
+        statusText = t('api.management.status.deprecated')
+      }
+      else if (row.status === 'DISABLED') {
+        statusType = 'default'
+        statusText = t('api.management.status.disabled')
+      }
+      else {
+        statusText = row.status || ''
+      }
+
+      return h(NTag, {
+        type: statusType,
+      }, { default: () => statusText })
     },
   },
   {
@@ -121,6 +164,7 @@ const columns = computed<DataTableColumns<ApiCO>>(() => [
         h(NButton, {
           size: 'small',
           type: 'error',
+          disabled: row.status !== 'DISABLED', // 只有禁用状态才能删除
           onClick: () => handleDelete(row),
         }, { default: () => t('button.delete') }),
       ])
@@ -186,6 +230,23 @@ const formFields = computed(() => [
     options: httpMethods.map(method => ({ label: method, value: method })),
     disabled: !!editingApi.value, // 编辑时禁用 HTTP 方法
   },
+  ...(editingApi.value
+    ? []
+    : [
+        {
+          key: 'version',
+          label: t('api.management.form.version'),
+          type: 'input' as const,
+          placeholder: t('form.placeholder.pleaseEnter'),
+        },
+      ]),
+  {
+    key: 'status',
+    label: t('api.management.form.status'),
+    type: 'select' as const,
+    placeholder: t('form.placeholder.pleaseSelect'),
+    options: apiStatusOptions,
+  },
   {
     key: 'description',
     label: t('api.management.form.description'),
@@ -202,6 +263,7 @@ const formInitialValues = computed(() => {
       apiName: editingApi.value.apiName,
       resourcePath: editingApi.value.resourcePath,
       resourceMethod: editingApi.value.resourceMethod,
+      status: editingApi.value.status || 'ENABLED',
       description: editingApi.value.description || '',
     }
   }
@@ -210,6 +272,8 @@ const formInitialValues = computed(() => {
     apiName: '',
     resourcePath: '',
     resourceMethod: '',
+    version: 'v1', // 默认版本
+    status: 'ENABLED', // 默认状态
     description: '',
   }
 })
@@ -373,10 +437,11 @@ async function handleFormSubmit(values: Record<string, any>) {
 
   try {
     if (editingApi.value) {
-      // 更新 API
+      // 更新 API（只能修改 apiName、status、description、metadata）
       const updateData: UpdateApiRequest = {
         id: editingApi.value.id,
         apiName: values.apiName,
+        status: values.status,
         description: values.description,
       }
 
@@ -392,12 +457,14 @@ async function handleFormSubmit(values: Record<string, any>) {
       }
     }
     else {
-      // 创建 API
+      // 创建 API（包含 version 和 status）
       const createData: CreateApiRequest = {
         apiCode: values.apiCode,
         apiName: values.apiName,
         resourcePath: values.resourcePath,
         resourceMethod: values.resourceMethod,
+        version: values.version,
+        status: values.status,
         description: values.description,
       }
 
@@ -433,6 +500,12 @@ async function handleFormSubmit(values: Record<string, any>) {
 
 // 处理删除
 function handleDelete(api: ApiCO) {
+  // 只有禁用状态的接口才能删除
+  if (api.status !== 'DISABLED') {
+    message.warning(t('api.management.messages.cannotDeleteNonDisabled'))
+    return
+  }
+
   dialog.warning({
     title: t('confirm.deleteConfirm'),
     content: t('api.management.confirm.deleteApi', { apiName: api.apiName }),
