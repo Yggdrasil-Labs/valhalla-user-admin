@@ -51,8 +51,12 @@ export interface GetApisParams {
 
 // 分页 API 列表响应（后端实际返回格式）
 export interface PaginatedApiResponse extends ApiResponse<ApiCO[]> {
-  // 注意：根据后端 API 文档，分页信息可能在其他字段中
-  // 如果后端返回分页信息，需要根据实际响应调整
+  totalCount?: number // 总记录数
+  pageSize?: number // 每页数量
+  pageIndex?: number // 当前页码
+  totalPages?: number // 总页数
+  notEmpty?: boolean // 是否非空
+  empty?: boolean // 是否为空
 }
 
 // 单个 API 响应（后端实际返回格式）

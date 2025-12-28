@@ -20,6 +20,7 @@ const dialog = useDialog()
 // 权限列表数据
 const permissions = ref<PermissionCO[]>([])
 const loading = ref(false)
+const initialLoading = ref(true) // 首次加载状态，用于控制骨架屏
 const error = ref<string | null>(null)
 
 // 分页参数
@@ -299,17 +300,22 @@ async function fetchPermissions() {
     const response = await getPermissionsApi(params)
 
     if (response.success && response.data) {
-      let filteredPermissions = response.data
-
-      // 如果同时有搜索和筛选，需要在前端再次筛选
-      if (searchValue.value && filterValue.value) {
-        filteredPermissions = filteredPermissions.filter(
-          permission => permission.module === filterValue.value,
-        )
+      permissions.value = response.data
+      // 使用后端返回的总记录数（后端已经根据过滤条件返回正确的总数）
+      const totalCount = (response as any).totalCount
+      if (totalCount !== undefined && totalCount !== null && totalCount > 0) {
+        pagination.value.itemCount = totalCount
       }
-
-      permissions.value = filteredPermissions
-      pagination.value.itemCount = filteredPermissions.length
+      else {
+        // 如果 totalCount 不存在，根据当前页数据长度估算
+        const dataLength = response.data.length
+        if (dataLength === pagination.value.pageSize) {
+          pagination.value.itemCount = pagination.value.page * pagination.value.pageSize + 1
+        }
+        else {
+          pagination.value.itemCount = (pagination.value.page - 1) * pagination.value.pageSize + dataLength
+        }
+      }
     }
     else {
       error.value = response.errMessage || t('permission.management.messages.loadFailed')
@@ -322,6 +328,10 @@ async function fetchPermissions() {
   }
   finally {
     loading.value = false
+    // 首次加载完成后，关闭骨架屏
+    if (initialLoading.value) {
+      initialLoading.value = false
+    }
   }
 }
 
@@ -571,7 +581,7 @@ onMounted(() => {
     </PageHeader>
 
     <Card>
-      <LoadingState v-if="loading" type="skeleton" :rows="5" />
+      <LoadingState v-if="initialLoading" type="skeleton" :rows="5" />
       <ErrorState
         v-else-if="error"
         :title="t('permission.management.messages.loadFailed')"
@@ -579,7 +589,7 @@ onMounted(() => {
         @retry="fetchPermissions"
       />
       <EmptyState
-        v-else-if="permissions.length === 0"
+        v-else-if="permissions.length === 0 && !searchValue && !filterValue"
         :title="t('permission.management.empty.title')"
         :description="t('permission.management.empty.description')"
         :action-text="t('permission.management.addPermission')"
@@ -589,7 +599,7 @@ onMounted(() => {
         v-else
         :columns="columns"
         :data="permissions"
-        :loading="false"
+        :loading="loading"
         :pagination="pagination"
         :searchable="true"
         :search-value="searchValue"

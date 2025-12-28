@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { DataTableColumns } from 'naive-ui'
 import type { BindingDialogConfig, BindingItem } from '@/types/store/binding'
+import { useElementSize, useResizeObserver } from '@vueuse/core'
 import { NButton, NDataTable, NInput, NModal, NSelect, NSpace, useMessage } from 'naive-ui'
 import { useI18nHelper } from '@/composables/useI18n'
 
@@ -118,8 +119,8 @@ async function fetchItems() {
 
     if (response.success && response.data) {
       items.value = response.data
-      // 注意：如果后端返回分页信息，需要根据实际响应调整
-      pagination.value.itemCount = response.data.length
+      // 使用后端返回的总记录数
+      pagination.value.itemCount = response.totalCount ?? response.data.length
 
       // 同步选中状态（保持已绑定项的选中状态）
       nextTick(() => {
@@ -228,6 +229,57 @@ const dialogStyle = computed(() => ({
   width: props.width,
   maxWidth: props.width,
 }))
+
+// --- 表格高度自适应（避免分页/底部行被遮挡）---
+const tableContainerRef = ref<HTMLElement | null>(null)
+const tableWrapRef = ref<HTMLElement | null>(null)
+const toolbarRef = ref<HTMLElement | null>(null)
+const errorRef = ref<HTMLElement | null>(null)
+const headerEl = ref<HTMLElement | null>(null)
+const paginationEl = ref<HTMLElement | null>(null)
+
+function syncTableInnerEls() {
+  const root = tableWrapRef.value
+  if (!root) {
+    headerEl.value = null
+    paginationEl.value = null
+    return
+  }
+  headerEl.value = root.querySelector('.n-data-table-base-table-header') as HTMLElement | null
+  paginationEl.value = root.querySelector('.n-data-table-pagination') as HTMLElement | null
+}
+
+onMounted(() => {
+  syncTableInnerEls()
+  nextTick(syncTableInnerEls)
+})
+
+useResizeObserver(tableWrapRef, syncTableInnerEls)
+useResizeObserver(tableContainerRef, syncTableInnerEls)
+
+const { height: tableContainerHeight } = useElementSize(tableContainerRef)
+const { height: toolbarHeight } = useElementSize(toolbarRef)
+const { height: errorHeight } = useElementSize(errorRef)
+const { height: headerHeight } = useElementSize(headerEl)
+const { height: paginationHeight } = useElementSize(paginationEl)
+
+const resolvedMaxHeight = computed<number | undefined>(() => {
+  // 表格容器可用高度（flex:1）
+  const baseH = tableContainerHeight.value
+  if (!baseH) {
+    return undefined
+  }
+
+  // 扣除：表头 + 分页 + 工具栏（极端情况下容器高度包含它）+ 错误提示
+  const reserved = (headerHeight.value || 0)
+    + (paginationHeight.value || 0)
+    + (toolbarHeight.value || 0)
+    + (errorHeight.value || 0)
+    + 16 // 预留一点间距，避免贴边裁剪
+
+  const bodyH = baseH - reserved
+  return bodyH > 80 ? bodyH : 80
+})
 </script>
 
 <template>
@@ -247,7 +299,7 @@ const dialogStyle = computed(() => ({
 
     <div class="binding-dialog-content">
       <!-- 搜索和筛选栏 -->
-      <div class="toolbar">
+      <div ref="toolbarRef" class="toolbar">
         <div class="toolbar-left">
           <!-- 筛选器 -->
           <div v-if="config.filterOptions && config.filterOptions.length > 0" class="filter-box">
@@ -290,22 +342,25 @@ const dialogStyle = computed(() => ({
       </div>
 
       <!-- 数据表格 -->
-      <div class="table-container">
-        <NDataTable
-          :columns="columns"
-          :data="items"
-          :loading="loadingItems || loading"
-          :pagination="pagination"
-          :row-key="(row: BindingItem) => row.id"
-          :row-class-name="getRowClassName"
-          :checked-row-keys="selectedIds"
-          max-height="calc(80vh - 200px)"
-          @update:checked-row-keys="handleSelectionChange"
-        />
+      <div ref="tableContainerRef" class="table-container">
+        <div ref="tableWrapRef" class="table-inner">
+          <NDataTable
+            :columns="columns"
+            :data="items"
+            :loading="loadingItems || loading"
+            :pagination="pagination"
+            :remote="true"
+            :row-key="(row: BindingItem) => row.id"
+            :row-class-name="getRowClassName"
+            :checked-row-keys="selectedIds"
+            :max-height="resolvedMaxHeight"
+            @update:checked-row-keys="handleSelectionChange"
+          />
+        </div>
       </div>
 
       <!-- 错误提示 -->
-      <div v-if="error" class="error-message">
+      <div v-if="error" ref="errorRef" class="error-message">
         {{ error }}
       </div>
     </div>
@@ -373,7 +428,7 @@ const dialogStyle = computed(() => ({
 
 .table-container {
   flex: 1;
-  overflow: hidden;
+  overflow: auto; // 兜底：避免内容被裁剪
   display: flex;
   flex-direction: column;
 }

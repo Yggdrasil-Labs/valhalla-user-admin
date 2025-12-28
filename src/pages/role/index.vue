@@ -20,6 +20,7 @@ const dialog = useDialog()
 // 角色列表数据
 const roles = ref<RoleCO[]>([])
 const loading = ref(false)
+const initialLoading = ref(true) // 首次加载状态，用于控制骨架屏
 const error = ref<string | null>(null)
 
 // 分页参数
@@ -249,18 +250,30 @@ async function fetchRoles() {
       params.roleName = searchValue.value
     }
 
+    // 将 isSystem 过滤条件传递给后端
+    if (filterValue.value !== undefined) {
+      params.isSystem = filterValue.value
+    }
+
     const response = await getRolesApi(params)
 
     if (response.success && response.data) {
-      let filteredRoles = response.data
-
-      // 前端筛选系统角色
-      if (filterValue.value !== undefined) {
-        filteredRoles = filteredRoles.filter(role => role.isSystem === filterValue.value)
+      roles.value = response.data
+      // 使用后端返回的总记录数（后端已经根据过滤条件返回正确的总数）
+      const totalCount = (response as any).totalCount
+      if (totalCount !== undefined && totalCount !== null && totalCount > 0) {
+        pagination.value.itemCount = totalCount
       }
-
-      roles.value = filteredRoles
-      pagination.value.itemCount = filteredRoles.length
+      else {
+        // 如果 totalCount 不存在，根据当前页数据长度估算
+        const dataLength = response.data.length
+        if (dataLength === pagination.value.pageSize) {
+          pagination.value.itemCount = pagination.value.page * pagination.value.pageSize + 1
+        }
+        else {
+          pagination.value.itemCount = (pagination.value.page - 1) * pagination.value.pageSize + dataLength
+        }
+      }
     }
     else {
       error.value = response.errMessage || t('role.management.messages.loadFailed')
@@ -273,6 +286,10 @@ async function fetchRoles() {
   }
   finally {
     loading.value = false
+    // 首次加载完成后，关闭骨架屏
+    if (initialLoading.value) {
+      initialLoading.value = false
+    }
   }
 }
 
@@ -530,7 +547,7 @@ onMounted(() => {
     </PageHeader>
 
     <Card>
-      <LoadingState v-if="loading" type="skeleton" :rows="5" />
+      <LoadingState v-if="initialLoading" type="skeleton" :rows="5" />
       <ErrorState
         v-else-if="error"
         :title="t('role.management.messages.loadFailed')"
@@ -538,7 +555,7 @@ onMounted(() => {
         @retry="fetchRoles"
       />
       <EmptyState
-        v-else-if="roles.length === 0"
+        v-else-if="roles.length === 0 && !searchValue && filterValue === undefined"
         :title="t('role.management.empty.title')"
         :description="t('role.management.empty.description')"
         :action-text="t('role.management.addRole')"
@@ -548,7 +565,7 @@ onMounted(() => {
         v-else
         :columns="columns"
         :data="roles"
-        :loading="false"
+        :loading="loading"
         :pagination="pagination"
         :searchable="true"
         :search-value="searchValue"

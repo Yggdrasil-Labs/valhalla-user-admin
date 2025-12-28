@@ -39,14 +39,19 @@ export interface UpdateRoleRequest {
 export interface GetRolesParams {
   roleName?: string // 角色名称（模糊匹配）
   roleCode?: string // 角色代码（模糊匹配）
+  isSystem?: boolean // 是否系统角色
   pageNum?: number // 页码（从1开始，默认1）
   pageSize?: number // 每页数量（默认10）
 }
 
 // 分页角色列表响应（后端实际返回格式）
 export interface PaginatedRoleResponse extends ApiResponse<RoleCO[]> {
-  // 注意：根据后端 API 文档，分页信息可能在其他字段中
-  // 如果后端返回分页信息，需要根据实际响应调整
+  totalCount?: number // 总记录数
+  pageSize?: number // 每页数量
+  pageIndex?: number // 当前页码
+  totalPages?: number // 总页数
+  notEmpty?: boolean // 是否非空
+  empty?: boolean // 是否为空
 }
 
 // 单个角色响应（后端实际返回格式）

@@ -21,6 +21,7 @@ const dialog = useDialog()
 // API 列表数据
 const apis = ref<ApiCO[]>([])
 const loading = ref(false)
+const initialLoading = ref(true) // 首次加载状态，用于控制骨架屏
 const error = ref<string | null>(null)
 
 // 分页参数
@@ -291,12 +292,12 @@ async function fetchApis() {
 
     // 支持按接口代码或资源路径搜索（后端支持模糊匹配）
     if (searchValue.value) {
-      // 优先使用接口代码搜索，如果没有匹配则使用资源路径
+      // 后端支持同时按 apiCode 和 resourcePath 搜索
       params.apiCode = searchValue.value
       params.resourcePath = searchValue.value
     }
 
-    // 按 HTTP 方法筛选
+    // 按 HTTP 方法筛选（后端处理）
     if (filterValue.value) {
       params.resourceMethod = filterValue.value
     }
@@ -304,28 +305,22 @@ async function fetchApis() {
     const response = await getApisApi(params)
 
     if (response.success && response.data) {
-      let filteredApis = response.data
-
-      // 如果同时设置了搜索和筛选，需要前端进一步筛选
-      if (searchValue.value && filterValue.value) {
-        filteredApis = filteredApis.filter(api =>
-          (api.apiCode?.includes(searchValue.value) || api.resourcePath?.includes(searchValue.value))
-          && api.resourceMethod === filterValue.value,
-        )
+      apis.value = response.data
+      // 使用后端返回的总记录数（后端已经根据过滤条件返回正确的总数）
+      const totalCount = (response as any).totalCount
+      if (totalCount !== undefined && totalCount !== null && totalCount > 0) {
+        pagination.value.itemCount = totalCount
       }
-      else if (searchValue.value) {
-        // 只搜索时，后端可能返回所有匹配的结果，需要前端过滤
-        filteredApis = filteredApis.filter(api =>
-          api.apiCode?.includes(searchValue.value) || api.resourcePath?.includes(searchValue.value),
-        )
+      else {
+        // 如果 totalCount 不存在，根据当前页数据长度估算
+        const dataLength = response.data.length
+        if (dataLength === pagination.value.pageSize) {
+          pagination.value.itemCount = pagination.value.page * pagination.value.pageSize + 1
+        }
+        else {
+          pagination.value.itemCount = (pagination.value.page - 1) * pagination.value.pageSize + dataLength
+        }
       }
-      else if (filterValue.value) {
-        // 只筛选时，后端应该已经过滤，但为了安全还是再过滤一次
-        filteredApis = filteredApis.filter(api => api.resourceMethod === filterValue.value)
-      }
-
-      apis.value = filteredApis
-      pagination.value.itemCount = filteredApis.length
     }
     else {
       error.value = response.errMessage || t('api.management.messages.loadFailed')
@@ -338,6 +333,10 @@ async function fetchApis() {
   }
   finally {
     loading.value = false
+    // 首次加载完成后，关闭骨架屏
+    if (initialLoading.value) {
+      initialLoading.value = false
+    }
   }
 }
 
@@ -554,7 +553,7 @@ onMounted(() => {
     </PageHeader>
 
     <Card>
-      <LoadingState v-if="loading" type="skeleton" :rows="5" />
+      <LoadingState v-if="initialLoading" type="skeleton" :rows="5" />
       <ErrorState
         v-else-if="error"
         :title="t('api.management.messages.loadFailed')"
@@ -562,7 +561,7 @@ onMounted(() => {
         @retry="fetchApis"
       />
       <EmptyState
-        v-else-if="apis.length === 0"
+        v-else-if="apis.length === 0 && !searchValue && !filterValue"
         :title="t('api.management.empty.title')"
         :description="t('api.management.empty.description')"
         :action-text="t('api.management.addApi')"
@@ -572,7 +571,7 @@ onMounted(() => {
         v-else
         :columns="columns"
         :data="apis"
-        :loading="false"
+        :loading="loading"
         :pagination="pagination"
         :searchable="true"
         :search-value="searchValue"

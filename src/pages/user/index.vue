@@ -26,6 +26,7 @@ const dialog = useDialog()
 // 用户列表数据
 const users = ref<UserCO[]>([])
 const loading = ref(false)
+const initialLoading = ref(true) // 首次加载状态，用于控制骨架屏
 const error = ref<string | null>(null)
 
 // 分页参数
@@ -275,9 +276,22 @@ async function fetchUsers() {
 
     if (response.success && response.data) {
       users.value = response.data
-      // 注意：如果后端返回分页信息，需要根据实际响应调整
-      // 这里假设 itemCount 在 response 的其他字段中，暂时使用数据长度
-      pagination.value.itemCount = response.data.length
+      // 使用后端返回的总记录数
+      // 确保 totalCount 存在且大于 0，否则使用数据长度作为回退
+      const totalCount = (response as any).totalCount
+      if (totalCount !== undefined && totalCount !== null && totalCount > 0) {
+        pagination.value.itemCount = totalCount
+      }
+      else {
+        // 如果 totalCount 不存在，根据当前页数据长度估算
+        const dataLength = response.data.length
+        if (dataLength === pagination.value.pageSize) {
+          pagination.value.itemCount = pagination.value.page * pagination.value.pageSize + 1
+        }
+        else {
+          pagination.value.itemCount = (pagination.value.page - 1) * pagination.value.pageSize + dataLength
+        }
+      }
     }
     else {
       error.value = response.errMessage || t('user.management.messages.loadFailed')
@@ -290,6 +304,10 @@ async function fetchUsers() {
   }
   finally {
     loading.value = false
+    // 首次加载完成后，关闭骨架屏
+    if (initialLoading.value) {
+      initialLoading.value = false
+    }
   }
 }
 
@@ -586,7 +604,7 @@ onMounted(() => {
     </PageHeader>
 
     <Card>
-      <LoadingState v-if="loading" type="skeleton" :rows="5" />
+      <LoadingState v-if="initialLoading" type="skeleton" :rows="5" />
       <ErrorState
         v-else-if="error"
         :title="t('user.management.messages.loadFailed')"
@@ -604,7 +622,7 @@ onMounted(() => {
         v-else
         :columns="columns"
         :data="users"
-        :loading="false"
+        :loading="loading"
         :pagination="pagination"
         :searchable="true"
         :search-value="searchValue"

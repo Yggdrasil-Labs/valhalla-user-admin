@@ -227,6 +227,24 @@ const resolvedMaxHeight = computed<number | undefined>(() => {
   // 小于 0 时交给外层滚提醒，但避免返回 0 导致 Naive scrollbar 判定异常
   return bodyH > 80 ? bodyH : 80
 })
+
+// 处理分页配置，确保正确传递给 Naive UI
+const paginationConfig = computed(() => {
+  if (!props.pagination) {
+    return false // 不显示分页
+  }
+
+  // 确保分页配置包含必要的字段
+  return {
+    page: props.pagination.page,
+    pageSize: props.pagination.pageSize,
+    itemCount: props.pagination.itemCount ?? 0,
+    showSizePicker: props.pagination.showSizePicker ?? true,
+    pageSizes: props.pagination.pageSizes ?? [10, 20, 50, 100],
+    onUpdatePage: props.pagination.onUpdatePage,
+    onUpdatePageSize: props.pagination.onUpdatePageSize,
+  }
+})
 </script>
 
 <template>
@@ -286,12 +304,12 @@ const resolvedMaxHeight = computed<number | undefined>(() => {
             :columns="resizableColumns"
             :data="data"
             :loading="loading"
-            :pagination="pagination"
+            :pagination="paginationConfig"
             :bordered="bordered"
             :striped="striped"
             :sort="sortStateModel"
             :sort-mode="sortMode"
-            :remote="false"
+            :remote="true"
             :max-height="resolvedMaxHeight"
             @update:sorter="handleSorterChange"
           />
@@ -340,7 +358,7 @@ const resolvedMaxHeight = computed<number | undefined>(() => {
     display: flex;
     flex-direction: column;
     min-height: 0; // 允许 flex 子元素收缩
-    overflow: auto; // 兜底：若内部计算异常，允许外层滚动避免内容被裁剪
+    // overflow: auto; // 兜底：若内部计算异常，允许外层滚动避免内容被裁剪
   }
 
   // 独立模式（单独使用）：显示边框、圆角、阴影、背景
@@ -367,7 +385,7 @@ const resolvedMaxHeight = computed<number | undefined>(() => {
       display: flex;
       flex-direction: column;
       min-height: 0; // 允许 flex 子元素收缩
-      overflow: auto; // 兜底：若内部计算异常，允许外层滚动避免内容被裁剪
+      // overflow: auto; // 兜底：若内部计算异常，允许外层滚动避免内容被裁剪
     }
   }
 
