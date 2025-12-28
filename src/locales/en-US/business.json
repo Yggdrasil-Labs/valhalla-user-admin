@@ -23,6 +23,8 @@
         "phone": "Phone",
         "nickname": "Nickname",
         "status": "Status",
+        "source": "Source",
+        "registerType": "Register Type",
         "createTime": "Create Time",
         "updateTime": "Update Time",
         "actions": "Actions"
@@ -59,6 +61,10 @@
         "deleteUser": "Are you sure you want to delete user {username}?",
         "disableUser": "Are you sure you want to disable user {username}?",
         "enableUser": "Are you sure you want to enable user {username}?"
+      },
+      "empty": {
+        "title": "No Users",
+        "description": "There are no users yet. Click the button below to add a new user"
       }
     }
   },
@@ -109,6 +115,10 @@
       "confirm": {
         "deleteRole": "Are you sure you want to delete role {roleName}?",
         "deleteSystemRole": "System roles cannot be deleted"
+      },
+      "empty": {
+        "title": "No Roles",
+        "description": "There are no roles yet. Click the button below to add a new role"
       }
     }
   },
@@ -156,6 +166,10 @@
       },
       "confirm": {
         "deletePermission": "Are you sure you want to delete permission {permissionName}?"
+      },
+      "empty": {
+        "title": "No Permissions",
+        "description": "There are no permissions yet. Click the button below to add a new permission"
       }
     }
   },
@@ -196,6 +210,10 @@
       },
       "confirm": {
         "deleteApi": "Are you sure you want to delete API {apiName}?"
+      },
+      "empty": {
+        "title": "No APIs",
+        "description": "There are no APIs yet. Click the button below to add a new API"
       }
     }
   }

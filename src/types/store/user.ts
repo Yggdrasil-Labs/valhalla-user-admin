@@ -27,6 +27,8 @@ export interface UserCO {
   status: number // 0-禁用，1-启用
   metadata?: string // 扩展信息（JSON）
   roleIds?: string[]
+  source?: string // 用户来源
+  registerType?: string // 注册类型
   createTime?: string
   updateTime?: string
 }

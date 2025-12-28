@@ -125,6 +125,18 @@ const columns = computed<DataTableColumns<UserCO>>(() => [
     },
   },
   {
+    title: t('user.management.columns.source'),
+    key: 'source',
+    width: 120,
+    align: 'left',
+  },
+  {
+    title: t('user.management.columns.registerType'),
+    key: 'registerType',
+    width: 120,
+    align: 'left',
+  },
+  {
     title: t('user.management.columns.createTime'),
     key: 'createTime',
     sorter: 'default',

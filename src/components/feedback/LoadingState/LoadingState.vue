@@ -12,7 +12,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   text: '加载中...',
-  type: 'spinner',
+  type: 'skeleton',
   rows: 5,
   cols: 1,
 })
@@ -27,18 +27,14 @@ withDefaults(defineProps<Props>(), {
       </p>
     </div>
     <div v-else class="loading-skeleton">
-      <div
+      <n-skeleton
         v-for="i in rows"
         :key="i"
-        class="skeleton-row"
-      >
-        <div
-          v-for="j in cols"
-          :key="j"
-          class="skeleton-item"
-          :style="{ width: j === cols && cols > 1 ? '60%' : '100%' }"
-        />
-      </div>
+        :text="cols === 1"
+        :round="false"
+        :height="20"
+        :style="{ marginBottom: i < rows ? '12px' : '0' }"
+      />
     </div>
   </div>
 </template>
@@ -73,35 +69,6 @@ withDefaults(defineProps<Props>(), {
   max-width: 800px;
   display: flex;
   flex-direction: column;
-  gap: map.get($spacings, 3); // 12px
-}
-
-.skeleton-row {
-  display: flex;
-  gap: map.get($spacings, 3); // 12px
-  align-items: center;
-}
-
-.skeleton-item {
-  height: 20px;
-  background: linear-gradient(
-    90deg,
-    map.get($colors, gray-200) 25%,
-    map.get($colors, gray-100) 50%,
-    map.get($colors, gray-200) 75%
-  );
-  background-size: 200% 100%;
-  border-radius: map.get($border-radius, base); // 6px
-  animation: skeleton-loading 1.5s ease-in-out infinite;
-}
-
-@keyframes skeleton-loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 // 响应式设计
