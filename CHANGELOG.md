@@ -1,3 +1,14 @@
+# [1.2.0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.1.0...v1.2.0) (2025-12-28)
+
+
+### Features
+
+* 优化数据表格和权限管理的加载状态，增加骨架屏支持 ([ce193af](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/ce193afa711480d56f78fa7d490d486170ca7d38))
+* 基于UI UX Pro Max进行样式优化 ([7ee5c80](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/7ee5c8025a4f84715d95bad8a464235a45ef1685))
+* 实现数据表格高度自适应和内部元素同步功能 ([f847f51](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/f847f511ca7d26a96527fc8e53f0f9f33723ff05))
+* 新增 用户来源、注册类型 字段展示 ([9210599](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/92105995781baef8fdef45a1b71ccf5aac808f6e))
+* 添加API版本和状态字段，更新国际化支持 ([9dca69e](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/9dca69e19443a909b9aefe6455ebd62f72e29eae))
+
 # [1.1.0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.0.0...v1.1.0) (2025-12-21)
 
 
