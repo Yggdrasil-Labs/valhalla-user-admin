@@ -1,7 +1,7 @@
 ---
 alwaysApply: true
 ---
-# Asgard Frontend Template 项目结构
+# 项目结构
 
 ## 项目概述
 基于 Vue 3 + TypeScript + Vite 的现代化前端模板项目，集成了完整的开发工具链和最佳实践。
