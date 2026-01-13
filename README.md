@@ -112,9 +112,6 @@ pnpm test:ui
 
 # check dependencies
 pnpm run dep:check
-
-# dry run release
-pnpm run release:dry-run
 ```
 
 ## 📚 开发文档

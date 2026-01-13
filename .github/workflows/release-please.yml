@@ -1,0 +1,85 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    # 避免重复执行：
+    # - 当 PR 合并时，会同时触发 push 和 pull_request 事件
+    # - 我们只在 push 事件时执行，忽略 pull_request closed 事件（因为会触发 push）
+    # - 但保留 pull_request opened/synchronize 事件（用于更新 release PR）
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.action != 'closed') ||
+      (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false)
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0  # 获取完整的 Git 历史，包括所有标签
+
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+        id: release
+        with:
+          config-file: .github/release-please-config.json
+          manifest-file: .github/.release-please-manifest.json
+          # 禁用自动添加标签，由后续步骤手动添加自定义标签
+          skip-labeling: true
+          # 禁用自动创建 GitHub Release/Tag，交由 create-tag.yml 和 release.yml 处理
+          # 这样可以使用 PAT (RELEASE_TOKEN) 创建 Tag，从而自动触发 Release 构建工作流
+          skip-github-release: true
+
+      - name: Add 🚀 release label to PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Waiting for PR to be searchable..."
+          # 简单的重试逻辑：尝试 5 次，每次间隔 5 秒
+          for i in {1..5}; do
+            # 显式指定 repo 以避免需要 checkout
+            PR_NUMBER=$(gh pr list --repo ${{ github.repository }} --search "head:release-please--branches--main is:open" --json number --jq '.[0].number')
+
+            if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ]; then
+              echo "Found Release PR: #$PR_NUMBER"
+              gh pr edit "$PR_NUMBER" --repo ${{ github.repository }} --add-label "🚀 release"
+              echo "Added '🚀 release' label to PR #$PR_NUMBER"
+              exit 0
+            fi
+
+            echo "Attempt $i: No open release PR found yet. Retrying in 5s..."
+            sleep 5
+          done
+
+          echo "No open release PR found after retries."
+          # 不报错退出，避免标记 workflow 为失败
+          exit 0
+
+  # 注意：实际的构建和 GitHub Release 创建由 release.yml 在 tag 推送时触发
+  # Tag 由 create-tag.yml 在 Release PR 合并后创建
+  log-release:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log release info
+        run: |
+          echo "🏷️ Release Please updated manifest"
+          echo "📦 Version: ${{ needs.release-please.outputs.version }}"
+          echo "🔄 The create-tag.yml workflow will create the tag"
+          echo "🔄 Then release.yml will be triggered by the tag push"

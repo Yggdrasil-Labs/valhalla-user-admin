@@ -2,33 +2,234 @@ name: Release
 
 on:
   push:
-    branches:
-      - main  # 主分支提交时触发
+    tags:
+      - 'v*'
+
+env:
+  NODE_VERSION: '22.14.0'
 
 jobs:
-  release:
+  build-verify:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 允许创建 Release 和 Tag
-
+      contents: read
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # 获取完整 commit 历史
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v6
         with:
-          node-version: 22.14.0
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      - name: Run semantic-release
+      - name: Lint check
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm type-check
+
+  build-release:
+    runs-on: ubuntu-latest
+    needs: [build-verify]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          # 从 tag 获取版本号
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
+          echo "Tag: $TAG_NAME"
+          echo "Version: $VERSION"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build for production
+        run: pnpm build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: dist-${{ steps.get_version.outputs.version }}
+          path: dist/
+          retention-days: 30
+
+  create-github-release:
+    runs-on: ubuntu-latest
+    needs: [build-release]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          # 从 tag 获取版本
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
+          echo "Tag: $TAG_NAME"
+          echo "Version: $VERSION"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          TAG_NAME="${{ steps.get_version.outputs.tag }}"
+          VERSION="${{ steps.get_version.outputs.version }}"
+
+          # 默认 release notes（带图标）
+          DEFAULT_NOTES="## 🚀 Release $VERSION
+
+          Release $VERSION is now available! 🎉
+
+          📝 See the [changelog](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
+
+          # 检查 CHANGELOG.md 是否存在
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "CHANGELOG.md not found, using default release notes"
+            RELEASE_NOTES="$DEFAULT_NOTES"
+          else
+            # release-please 生成的 CHANGELOG 格式通常是：
+            # ## [1.0.0](https://...) (2024-01-01)
+            # 或
+            # ## 1.0.0 (2024-01-01)
+
+            # 尝试提取对应版本的 release notes
+            EXTRACTED=$(awk -v version="$VERSION" '
+              BEGIN {
+                found=0
+                in_section=0
+              }
+              /^## \[/ || /^## [0-9]/ {
+                if (in_section) exit
+                if (index($0, "[" version "]") > 0 || index($0, "## " version) == 1) {
+                  found=1
+                  in_section=1
+                  print
+                  next
+                }
+              }
+              in_section { print }
+            ' CHANGELOG.md)
+
+            if [ -n "$EXTRACTED" ] && [ ${#EXTRACTED} -gt 10 ]; then
+              # 为版本标题添加火箭图标
+              CHANGELOG_CONTENT=$(echo "$EXTRACTED" | sed \
+                -e 's/^## \[\([^]]*\)\]/## 🚀 Release \1/g' \
+                -e 's/^## \([0-9][^ ]*\) /## 🚀 Release \1 /g' \
+                -e 's/BREAKING CHANGE/💥 BREAKING CHANGE/g' \
+                -e 's/Breaking Change/💥 Breaking Change/g')
+
+              # 构建 release notes
+              RELEASE_NOTES=""
+              RELEASE_NOTES="${RELEASE_NOTES}🎉 **Release ${VERSION} is now available!**"
+              RELEASE_NOTES="${RELEASE_NOTES}"$'\n'$'\n'
+              RELEASE_NOTES="${RELEASE_NOTES}${CHANGELOG_CONTENT}"
+              RELEASE_NOTES="${RELEASE_NOTES}"$'\n'$'\n'
+              RELEASE_NOTES="${RELEASE_NOTES}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+              RELEASE_NOTES="${RELEASE_NOTES}"$'\n'$'\n'
+              RELEASE_NOTES="${RELEASE_NOTES}📖 [View Full Changelog](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) | 📋 [Documentation](https://github.com/${{ github.repository }}/blob/main/README.md)"
+
+              echo "Successfully extracted and enhanced release notes from CHANGELOG.md"
+            else
+              echo "Could not extract release notes from CHANGELOG.md, using default"
+              RELEASE_NOTES="$DEFAULT_NOTES"
+            fi
+          fi
+
+          # 使用 multiline output
+          {
+            echo "release_notes<<EOF"
+            echo "$RELEASE_NOTES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+          echo "Release notes prepared (first 300 chars):"
+          echo "$RELEASE_NOTES" | head -c 300
+          echo ""
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: dist-${{ steps.get_version.outputs.version }}
+          path: dist/
+
+      - name: Create release archive
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          cd dist
+          zip -r "../valhalla-user-admin-${VERSION}.zip" .
+          cd ..
+          echo "Created release archive: valhalla-user-admin-${VERSION}.zip"
+          ls -la *.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.2.0
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          body: ${{ steps.changelog.outputs.release_notes }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          files: |
+            valhalla-user-admin-${{ steps.get_version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
-

@@ -106,63 +106,27 @@ npx --no -- commitlint --edit ${1}
 
 ## 版本管理
 
-### Semantic Release 配置
-项目使用 `semantic-release` 自动化版本管理，配置位于 [package.json](mdc:package.json)：
+### GitHub Actions 自动发布
+项目使用 **GitHub Actions** 和 **Release Please** 实现自动化版本管理和发布，无需本地配置。
 
-```json
-{
-  "release": {
-    "branches": ["main"],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      [
-        "@semantic-release/changelog",
-        {
-          "changelogFile": "CHANGELOG.md"
-        }
-      ],
-      [
-        "@semantic-release/npm",
-        {
-          "npmPublish": false
-        }
-      ],
-      "@semantic-release/github",
-      [
-        "@semantic-release/git",
-        {
-          "assets": ["CHANGELOG.md", "package.json"],
-          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-          "gitOptions": {
-            "signed": true
-          }
-        }
-      ]
-    ]
-  }
-}
-```
+发布流程由以下 GitHub Actions 工作流自动完成：
+- **Release Please Workflow** (`.github/workflows/release-please.yml`): 分析提交信息，自动生成 Release PR
+- **Create Tag Workflow** (`.github/workflows/create-tag.yml`): 监听 Release PR 合并，自动创建 Git Tag
+- **Release Workflow** (`.github/workflows/release.yml`): 监听 Tag 推送，自动构建并创建 GitHub Release
 
 ### 版本发布流程
-1. **提交代码**: 使用 Conventional Commits 格式
-2. **自动分析**: `semantic-release` 分析提交信息
-3. **生成版本**: 根据提交类型自动生成版本号
-4. **更新文档**: 自动更新 `CHANGELOG.md`
-5. **创建标签**: 自动创建 Git 标签
-6. **发布**: 自动发布到 GitHub
+1. **提交代码**: 使用 Conventional Commits 格式提交到 `main` 分支
+2. **自动分析**: Release Please 分析提交信息，根据提交类型建议版本号
+3. **生成提案**: 自动创建 Release PR，包含更新的 `CHANGELOG.md` 和 `package.json`
+4. **合并发布**: 维护者 Review 并合并 Release PR
+5. **自动打标**: 自动创建并推送 Git Tag (如 `v1.2.0`)
+6. **构建发布**: 自动构建生产包，创建 GitHub Release 并上传构建产物
 
-### 发布命令
-```bash
-# 本地预览发布流程（不实际发布）
-pnpm release:dry-run
-
-# CI 环境发布
-pnpm release:ci
-
-# 手动发布
-pnpm release
-```
+### 发布说明
+- 所有发布流程均在 GitHub Actions 中自动完成
+- 无需本地运行任何发布命令
+- 版本号由 Release Please 根据提交类型自动生成
+- 详细流程请参考 [.github/Workflow.md](.github/Workflow.md)
 
 ## Git 工作流
 
@@ -254,7 +218,7 @@ git branch -d feature/user-profile
 4. **创建 PR**: 创建 Pull Request
 5. **代码审查**: 团队成员审查代码
 6. **合并代码**: 审查通过后合并到 `main`
-7. **自动发布**: `semantic-release` 自动发布
+7. **自动发布**: GitHub Actions 自动处理版本管理和发布
 
 ### 发布检查清单
 - [ ] 所有测试通过

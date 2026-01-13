@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.2.0",
   "private": true,
-  "packageManager": "pnpm@10.26.0",
+  "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.14.0"
   },
@@ -24,9 +24,6 @@
     "type-check": "vue-tsc --noEmit",
     "dep:check": "pnpm dlx npm-check-updates",
     "dep:update": "pnpm dlx npm-check-updates -u && pnpm install",
-    "release": "semantic-release",
-    "release:dry-run": "semantic-release --dry-run",
-    "release:ci": "pnpm run build && pnpm run release",
     "prepare": "husky"
   },
   "dependencies": {
@@ -45,12 +42,6 @@
     "@commitlint/config-conventional": "^20.3.0",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "@playwright/test": "^1.57.0",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.2",
-    "@semantic-release/npm": "^13.1.3",
-    "@semantic-release/release-notes-generator": "^14.1.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/user-event": "^14.6.1",
     "@testing-library/vue": "^8.1.0",
@@ -67,7 +58,6 @@
     "lint-staged": "^16.2.7",
     "modern-normalize": "^3.0.1",
     "sass": "^1.97.1",
-    "semantic-release": "^25.0.2",
     "typescript": "~5.9.3",
     "unplugin-auto-import": "^20.3.0",
     "unplugin-vue-components": "^30.0.0",
@@ -79,40 +69,5 @@
   "lint-staged": {
     "*.{ts,tsx,vue,js,json,md,yml}": "eslint --fix",
     "*.{test,spec}.{ts,tsx,vue,js}": "eslint --fix"
-  },
-  "release": {
-    "branches": [
-      "main"
-    ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      [
-        "@semantic-release/changelog",
-        {
-          "changelogFile": "CHANGELOG.md"
-        }
-      ],
-      [
-        "@semantic-release/npm",
-        {
-          "npmPublish": false
-        }
-      ],
-      "@semantic-release/github",
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "CHANGELOG.md",
-            "package.json"
-          ],
-          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
-          "gitOptions": {
-            "signed": true
-          }
-        }
-      ]
-    ]
   }
 }
