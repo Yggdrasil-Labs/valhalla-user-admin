@@ -109,8 +109,6 @@ export default defineConfig({
     // 设置环境变量以确保服务器在测试模式下运行
     env: {
       NODE_ENV: 'test',
-      // 确保在测试环境中运行
-      VITE_ENV: 'test',
     },
   },
 })

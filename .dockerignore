@@ -1,0 +1,76 @@
+# 依赖目录
+node_modules
+.pnpm-store
+
+# 构建产物
+dist
+build
+.output
+
+# 开发工具
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# 测试相关
+coverage
+.nyc_output
+test-results
+playwright-report
+playwright/.cache
+
+# Git 相关
+.git
+.gitignore
+.gitattributes
+
+# 文档
+docs
+*.md
+!README.md
+
+# 环境变量文件
+# 排除本地和敏感文件，但允许环境特定的文件（.env.production, .env.test 等）
+.env
+.env.local
+.env.*.local
+# 允许环境特定的文件被复制（Vite 的 loadEnv 需要读取这些文件）
+!.env.production
+!.env.test
+!.env.development
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# 其他
+.cache
+.temp
+tmp
+*.tmp
+
+# OpenSpec 相关（开发时使用）
+openspec
+
+# Husky
+.husky
+
+# ESLint 缓存
+.eslintcache
+
+# TypeScript
+*.tsbuildinfo
