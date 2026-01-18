@@ -1,6 +1,6 @@
 # 多阶段构建 Dockerfile
 # 阶段 1: 构建阶段
-FROM node:22-alpine AS builder
+FROM node:25-alpine AS builder
 
 # 设置工作目录
 WORKDIR /app
