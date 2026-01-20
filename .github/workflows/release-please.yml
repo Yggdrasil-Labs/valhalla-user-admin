@@ -39,7 +39,7 @@ jobs:
         # 如果配置了 GitHub App，生成 installation token；否则跳过
         # 使用 continue-on-error 避免 secret 不存在时工作流失败
         continue-on-error: true
-        uses: tibdex/github-app-token@b62528385c8d806b4e33b2e79b91e0e0c5c0e0e1 # v2.1.0
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
         with:
           app_id: ${{ secrets.RELEASE_APP_ID }}
           private_key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
