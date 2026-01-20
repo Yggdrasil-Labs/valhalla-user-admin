@@ -34,11 +34,24 @@ jobs:
         with:
           fetch-depth: 0  # 获取完整的 Git 历史，包括所有标签
 
+      - name: Generate GitHub App Token
+        id: app-token
+        # 如果配置了 GitHub App，生成 installation token；否则跳过
+        # 使用 continue-on-error 避免 secret 不存在时工作流失败
+        continue-on-error: true
+        uses: tibdex/github-app-token@b62528385c8d806b4e33b2e79b91e0e0c5c0e0e1 # v2.1.0
+        with:
+          app_id: ${{ secrets.RELEASE_APP_ID }}
+          private_key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
         id: release
         with:
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
+          # 优先使用 GitHub App token，其次 PAT，最后使用 GITHUB_TOKEN
+          # GitHub App token 可以避免仓库权限限制，且更安全
+          token: ${{ steps.app-token.outputs.token || secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
           # 禁用自动添加标签，由后续步骤手动添加自定义标签
           skip-labeling: true
           # 禁用自动创建 GitHub Release/Tag，交由 create-tag.yml 和 release.yml 处理
@@ -47,7 +60,8 @@ jobs:
 
       - name: Add 🚀 release label to PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 优先使用 GitHub App token，其次 PAT，最后使用 GITHUB_TOKEN
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           echo "Waiting for PR to be searchable..."
           # 简单的重试逻辑：尝试 5 次，每次间隔 5 秒
