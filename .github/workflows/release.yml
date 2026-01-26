@@ -4,6 +4,18 @@ on:
   push:
     tags:
       - 'v*'
+  # 支持手动触发（基于已存在的 tag 构建发布）
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '发布版本号（例如：1.2.0，不需要 v 前缀；要求对应 tag v{version} 已存在）'
+        required: true
+        type: string
+      skip_ghcr:
+        description: '跳过 GitHub Packages (GHCR) 镜像发布'
+        required: false
+        type: boolean
+        default: false
 
 env:
   NODE_VERSION: '22.14.0'
@@ -14,13 +26,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ github.ref }}
+          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -57,7 +70,8 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ github.ref }}
+          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
@@ -87,9 +101,16 @@ jobs:
       - name: Get version from tag
         id: get_version
         run: |
-          # 从 tag 获取版本号
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
+          # 支持 tag push 和手动触发两种方式
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG_NAME="v${VERSION}"
+            echo "Manual trigger detected"
+          else
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
+            echo "Tag push detected"
+          fi
           echo "Tag: $TAG_NAME"
           echo "Version: $VERSION"
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
@@ -105,24 +126,98 @@ jobs:
           path: dist/
           retention-days: 30
 
-  create-github-release:
+  publish-ghcr-image:
+    name: Build & Push Docker image (GHCR)
     runs-on: ubuntu-latest
     needs: [build-release]
+    # 手动触发时支持跳过
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.skip_ghcr != 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
+          fetch-depth: 0
+
+      - name: Get version from tag or input
+        id: get_version
+        run: |
+          # 支持 tag push 和手动触发两种方式
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG_NAME="v${VERSION}"
+            echo "Manual trigger detected"
+          else
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
+            echo "Tag push detected"
+          fi
+
+          echo "Tag: $TAG_NAME"
+          echo "Version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@18ce135bb5112fa8ce4ed6c17ab05699d7f3a5e0 # v3.11.0
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          provenance: false
+          platforms: linux/amd64
+          build-args: |
+            MODE=production
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.tag }}
+            ghcr.io/${{ github.repository }}:latest
+
+  create-github-release:
+    runs-on: ubuntu-latest
+    needs: [build-release, publish-ghcr-image]
+    # 允许 publish-ghcr-image 在手动触发跳过时继续创建 GitHub Release
+    if: >-
+      ${{ always()
+          && needs.build-release.result == 'success'
+          && (needs['publish-ghcr-image'].result == 'success' || needs['publish-ghcr-image'].result == 'skipped') }}
     permissions:
       contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ github.ref }}
+          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
           fetch-depth: 0
 
       - name: Get version from tag
         id: get_version
         run: |
-          # 从 tag 获取版本
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
+          # 支持 tag push 和手动触发两种方式
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG_NAME="v${VERSION}"
+            echo "Manual trigger detected"
+          else
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
+            echo "Tag push detected"
+          fi
           echo "Tag: $TAG_NAME"
           echo "Version: $VERSION"
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
