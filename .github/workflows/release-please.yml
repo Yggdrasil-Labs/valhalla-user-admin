@@ -15,6 +15,10 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    # 避免同一事件源并发堆积（截图里大量 in progress 的根因之一）
+    concurrency:
+      group: release-please-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     # 避免重复执行：
     # - 当 PR 合并时，会同时触发 push 和 pull_request 事件
     # - 我们只在 push 事件时执行，忽略 pull_request closed 事件（因为会触发 push）
@@ -22,8 +26,19 @@ jobs:
     if: |
       github.event_name == 'push' ||
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && github.event.action != 'closed') ||
-      (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false)
+      (
+        github.event_name == 'pull_request' &&
+        github.event.sender.type != 'Bot' &&
+        !startsWith(github.event.pull_request.head.ref, 'release-please--branches--main') &&
+        github.event.action != 'closed'
+      ) ||
+      (
+        github.event_name == 'pull_request' &&
+        github.event.sender.type != 'Bot' &&
+        !startsWith(github.event.pull_request.head.ref, 'release-please--branches--main') &&
+        github.event.action == 'closed' &&
+        github.event.pull_request.merged == false
+      )
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
