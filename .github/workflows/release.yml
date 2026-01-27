@@ -183,9 +183,9 @@ jobs:
           build-args: |
             MODE=production
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
-            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.tag }}
-            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ toLower(github.repository) }}:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ toLower(github.repository) }}:${{ steps.get_version.outputs.tag }}
+            ghcr.io/${{ toLower(github.repository) }}:latest
 
   create-github-release:
     runs-on: ubuntu-latest
