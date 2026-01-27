@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.3.0...v1.3.1) (2026-01-27)
+
+
+### 🔧 Miscellaneous Chores
+
+* **build:** update image naming to use GitHub Container Registry ([8bda804](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/8bda80471225e047053a0f456f482e1156180b7e))
+
 ## [1.3.0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.2.0...v1.3.0) (2026-01-27)
 
 
