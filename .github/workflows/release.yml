@@ -21,15 +21,57 @@ env:
   NODE_VERSION: '22.14.0'
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      ref: ${{ steps.prepare.outputs.ref }}
+      version: ${{ steps.prepare.outputs.version }}
+      tag: ${{ steps.prepare.outputs.tag }}
+      image: ${{ steps.prepare.outputs.image }}
+    steps:
+      - name: Prepare ref/version/tag/image
+        id: prepare
+        run: |
+          set -euo pipefail
+
+          # 支持 tag push 和手动触发两种方式
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG_NAME="v${VERSION}"
+            REF="refs/tags/${TAG_NAME}"
+            echo "Manual trigger detected"
+          else
+            REF="${GITHUB_REF}"
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG_NAME#v}"  # 移除 'v' 前缀
+            echo "Tag push detected"
+          fi
+
+          # GHCR 镜像仓库名必须小写：ghcr.io/<org>/<repo>
+          REPO_LC="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
+          IMAGE="ghcr.io/${REPO_LC}"
+
+          echo "Ref: $REF"
+          echo "Tag: $TAG_NAME"
+          echo "Version: $VERSION"
+          echo "Image: $IMAGE"
+
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
   build-verify:
     runs-on: ubuntu-latest
+    needs: [prepare]
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
+          ref: ${{ needs.prepare.outputs.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
@@ -64,14 +106,13 @@ jobs:
 
   build-release:
     runs-on: ubuntu-latest
-    needs: [build-verify]
+    needs: [prepare, build-verify]
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
+          ref: ${{ needs.prepare.outputs.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
@@ -98,40 +139,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Get version from tag
-        id: get_version
-        run: |
-          # 支持 tag push 和手动触发两种方式
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-            TAG_NAME="v${VERSION}"
-            echo "Manual trigger detected"
-          else
-            TAG_NAME=${GITHUB_REF#refs/tags/}
-            VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
-            echo "Tag push detected"
-          fi
-          echo "Tag: $TAG_NAME"
-          echo "Version: $VERSION"
-          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Build for production
         run: pnpm build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: dist-${{ steps.get_version.outputs.version }}
+          name: dist-${{ needs.prepare.outputs.version }}
           path: dist/
           retention-days: 30
 
-  publish-ghcr-image:
+  # ==================== Docker 镜像发布 ====================
+  publish-docker-image:
     name: Build & Push Docker image (GHCR)
     runs-on: ubuntu-latest
-    needs: [build-release]
+    needs: [prepare, build-release]
     # 手动触发时支持跳过
-    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.skip_ghcr != 'true' }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && github.event.inputs.skip_ghcr == 'true') }}
     permissions:
       contents: read
       packages: write
@@ -139,28 +163,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
+          ref: ${{ needs.prepare.outputs.ref }}
           fetch-depth: 0
 
-      - name: Get version from tag or input
-        id: get_version
-        run: |
-          # 支持 tag push 和手动触发两种方式
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-            TAG_NAME="v${VERSION}"
-            echo "Manual trigger detected"
-          else
-            TAG_NAME=${GITHUB_REF#refs/tags/}
-            VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
-            echo "Tag push detected"
-          fi
-
-          echo "Tag: $TAG_NAME"
-          echo "Version: $VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@18ce135bb5112fa8ce4ed6c17ab05699d7f3a5e0 # v3.11.0
@@ -172,62 +179,68 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push image
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+        with:
+          images: ${{ needs.prepare.outputs.image }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.prepare.outputs.tag }}
+            type=raw,value=${{ needs.prepare.outputs.tag }}
+            type=raw,value=latest
+
+      - name: Build and push Docker image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           provenance: false
-          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             MODE=production
-          tags: |
-            ghcr.io/${{ toLower(github.repository) }}:${{ steps.get_version.outputs.version }}
-            ghcr.io/${{ toLower(github.repository) }}:${{ steps.get_version.outputs.tag }}
-            ghcr.io/${{ toLower(github.repository) }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Output image info
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          IMAGE="${{ needs.prepare.outputs.image }}"
+          echo "============================================"
+          echo "🐳 Docker 镜像发布成功！"
+          echo "============================================"
+          echo ""
+          echo "📦 镜像地址:"
+          echo "   ${IMAGE}:${VERSION}"
+          echo "   ${IMAGE}:latest"
+          echo ""
+          echo "🚀 拉取命令:"
+          echo "   docker pull ${IMAGE}:${VERSION}"
 
   create-github-release:
     runs-on: ubuntu-latest
-    needs: [build-release, publish-ghcr-image]
-    # 允许 publish-ghcr-image 在手动触发跳过时继续创建 GitHub Release
+    needs: [prepare, build-release, publish-docker-image]
+    # 允许 publish-docker-image 在手动触发跳过时继续创建 GitHub Release
     if: >-
       ${{ always()
           && needs.build-release.result == 'success'
-          && (needs['publish-ghcr-image'].result == 'success' || needs['publish-ghcr-image'].result == 'skipped') }}
+          && (needs['publish-docker-image'].result == 'success' || needs['publish-docker-image'].result == 'skipped') }}
     permissions:
       contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          # tag push: 使用 github.ref；手动触发: 使用输入版本对应的标签
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', github.event.inputs.version) || github.ref }}
+          ref: ${{ needs.prepare.outputs.ref }}
           fetch-depth: 0
-
-      - name: Get version from tag
-        id: get_version
-        run: |
-          # 支持 tag push 和手动触发两种方式
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-            TAG_NAME="v${VERSION}"
-            echo "Manual trigger detected"
-          else
-            TAG_NAME=${GITHUB_REF#refs/tags/}
-            VERSION=${TAG_NAME#v}  # 移除 'v' 前缀
-            echo "Tag push detected"
-          fi
-          echo "Tag: $TAG_NAME"
-          echo "Version: $VERSION"
-          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Extract release notes from CHANGELOG
         id: changelog
         run: |
-          TAG_NAME="${{ steps.get_version.outputs.tag }}"
-          VERSION="${{ steps.get_version.outputs.version }}"
+          TAG_NAME="${{ needs.prepare.outputs.tag }}"
+          VERSION="${{ needs.prepare.outputs.version }}"
 
           # 默认 release notes（带图标）
           DEFAULT_NOTES="## 🚀 Release $VERSION
@@ -303,12 +316,12 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: dist-${{ steps.get_version.outputs.version }}
+          name: dist-${{ needs.prepare.outputs.version }}
           path: dist/
 
       - name: Create release archive
         run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
+          VERSION="${{ needs.prepare.outputs.version }}"
           cd dist
           zip -r "../valhalla-user-admin-${VERSION}.zip" .
           cd ..
@@ -318,13 +331,13 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.2.0
         with:
-          tag_name: ${{ steps.get_version.outputs.tag }}
-          name: Release ${{ steps.get_version.outputs.version }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: Release ${{ needs.prepare.outputs.version }}
           body: ${{ steps.changelog.outputs.release_notes }}
           draft: false
           prerelease: false
           generate_release_notes: false
           files: |
-            valhalla-user-admin-${{ steps.get_version.outputs.version }}.zip
+            valhalla-user-admin-${{ needs.prepare.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
