@@ -13,6 +13,8 @@ NC='\033[0m' # No Color
 
 # 默认配置
 IMAGE_NAME="valhalla-user-admin"
+IMAGE_PREFIX="ghcr.io/yggdrasil-labs"
+FULL_IMAGE_NAME="${IMAGE_PREFIX}/${IMAGE_NAME}"
 VERSION="latest"
 DOCKERFILE="Dockerfile"
 BUILD_CONTEXT="."
@@ -104,14 +106,14 @@ check_files() {
 cleanup_old_images() {
     if [ "$CLEAN_FLAG" == "--clean" ]; then
         info "清理旧镜像..."
-        docker images "$IMAGE_NAME" -q | xargs -r docker rmi -f 2>/dev/null || true
+        docker images "$FULL_IMAGE_NAME" -q | xargs -r docker rmi -f 2>/dev/null || true
     fi
 }
 
 # 构建镜像
 build_image() {
     info "开始构建 Docker 镜像..."
-    info "镜像名称: $IMAGE_NAME:$VERSION"
+    info "镜像名称: $FULL_IMAGE_NAME:$VERSION"
     info "构建上下文: $BUILD_CONTEXT"
     info "模式: $MODE"
     if [ -n "$VITE_APP_NAME" ]; then
@@ -122,7 +124,7 @@ build_image() {
     fi
     
     # 构建 Docker build 命令
-    BUILD_CMD="docker build -t $IMAGE_NAME:$VERSION -t $IMAGE_NAME:latest -f $DOCKERFILE --build-arg MODE=$MODE"
+    BUILD_CMD="docker build -t $FULL_IMAGE_NAME:$VERSION -t $FULL_IMAGE_NAME:latest -f $DOCKERFILE --build-arg MODE=$MODE"
     
     # 添加可选的环境变量
     if [ -n "$VITE_APP_NAME" ]; then
@@ -138,13 +140,13 @@ build_image() {
     
     if [ $? -eq 0 ]; then
         info "镜像构建成功！"
-        info "镜像标签: $IMAGE_NAME:$VERSION, $IMAGE_NAME:latest"
+        info "镜像标签: $FULL_IMAGE_NAME:$VERSION, $FULL_IMAGE_NAME:latest"
         echo ""
         info "运行容器:"
-        echo "  docker run -d -p 8080:80 --name $IMAGE_NAME $IMAGE_NAME:$VERSION"
+        echo "  docker run -d -p 8080:80 --name $IMAGE_NAME $FULL_IMAGE_NAME:$VERSION"
         echo ""
         info "查看镜像:"
-        echo "  docker images $IMAGE_NAME"
+        echo "  docker images $FULL_IMAGE_NAME"
     else
         error "镜像构建失败"
         exit 1

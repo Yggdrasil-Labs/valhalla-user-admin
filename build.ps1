@@ -1,4 +1,4 @@
-﻿# Docker 构建脚本 (PowerShell)
+# Docker 构建脚本 (PowerShell)
 # 用于构建 valhalla-user-admin 项目的 Docker 镜像
 
 param(
@@ -19,7 +19,8 @@ chcp 65001 | Out-Null
 $ErrorActionPreference = "Stop"
 
 # 默认配置
-$ImageName = "yggdrasil-labs/valhalla-user-admin"
+$ImageName = "ghcr.io/yggdrasil-labs/valhalla-user-admin"
+$ContainerName = "valhalla-user-admin"
 $Dockerfile = "Dockerfile"
 $BuildContext = "."
 
@@ -128,7 +129,7 @@ function Build-Image {
         Write-Info "镜像标签: ${ImageName}:${Version}, ${ImageName}:latest"
         Write-Host ""
         Write-Info "运行容器:"
-        Write-Host "  docker run -d -p 8080:80 --name $ImageName ${ImageName}:${Version}" -ForegroundColor Cyan
+        Write-Host "  docker run -d -p 8080:80 --name $ContainerName ${ImageName}:${Version}" -ForegroundColor Cyan
         Write-Host ""
         Write-Info "查看镜像:"
         Write-Host "  docker images $ImageName" -ForegroundColor Cyan
