@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.1](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.3.0...v1.3.1) (2026-01-31)
+
+
+### 🔧 Miscellaneous Chores
+
+* **build:** update image naming to use GitHub Container Registry ([8bda804](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/8bda80471225e047053a0f456f482e1156180b7e))
+* **deps:** bump actions/cache from 5.0.1 to 5.0.3 ([82f9a31](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/82f9a31b8b73c7fcab224f0b02c14cc146532ceb))
+* **deps:** bump actions/checkout from 6.0.1 to 6.0.2 ([3d5120f](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/3d5120fec95d4066e3991127c48d4a49dbf14090))
+* **deps:** bump actions/setup-node from 6.1.0 to 6.2.0 ([4a1a5bc](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/4a1a5bc5de577e92c08e3951efc09d5d8bc2d278))
+* **deps:** bump docker/login-action from 3.4.0 to 3.7.0 ([8540dad](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/8540dad17e580c5787898982a6a18d6bb01b13e3))
+* **deps:** bump docker/metadata-action from 5.8.0 to 5.10.0 ([9d949aa](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/9d949aa4774e8e589bc7040db08751154794854d))
+* **deps:** bump docker/setup-buildx-action from 3.11.0 to 3.12.0 ([6062d91](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/6062d9171dbb3c6206370852277b7410cd4f6fa1))
+* **deps:** bump docker/setup-qemu-action from 3.0.0 to 3.7.0 ([cbd2778](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/cbd2778dc37150677eea62f1cd3569b274e95b73))
+* **deps:** bump the minor-and-patch group with 2 updates ([6919db1](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/6919db13dae96ec494d2d48b28abaad01454363e))
+
 ## [1.3.0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.2.0...v1.3.0) (2026-01-27)
 
 
