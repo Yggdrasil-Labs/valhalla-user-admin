@@ -186,7 +186,6 @@ jobs:
           images: ${{ needs.prepare.outputs.image }}
           tags: |
             type=semver,pattern={{version}},value=${{ needs.prepare.outputs.tag }}
-            type=raw,value=${{ needs.prepare.outputs.tag }}
             type=raw,value=latest
 
       - name: Build and push Docker image

@@ -3,6 +3,7 @@
 /**
  * 环境变量封装模块
  * 统一从 import.meta.env 获取配置，并提供类型提示和验证
+ * 支持运行时覆盖：通过 /config.js 注入的 window.__APP_RUNTIME_CONFIG__ 优先于构建时配置
  */
 
 // 构建/运行层面的模式
@@ -10,11 +11,19 @@ export type AppMode = 'development' | 'test' | 'production'
 // 业务层面的环境标识
 export type AppEnv = 'dev' | 'test' | 'prod'
 
+/** 运行时配置（由 /config.js 在应用启动前注入，部署时可通过环境变量生成） */
+export interface AppRuntimeConfig {
+  VITE_API_BASE_URL?: string
+}
+
 // 扩展 Vite 的环境变量接口
 declare global {
   interface ImportMetaEnv {
     readonly VITE_APP_NAME?: string
     readonly VITE_API_BASE_URL?: string
+  }
+  interface Window {
+    __APP_RUNTIME_CONFIG__?: AppRuntimeConfig
   }
 }
 
@@ -70,11 +79,18 @@ const APP_NAME = validateEnvVar(
 // 版本号来自构建时注入的常量 __APP_VERSION__
 const APP_VERSION: string = __APP_VERSION__
 
-const API_BASE_URL = validateEnvVar(
-  import.meta.env.VITE_API_BASE_URL,
-  envDefaults.API_BASE_URL,
-  'VITE_API_BASE_URL',
-)
+// API_BASE_URL：运行时配置 > 构建时环境变量 > 按 MODE 的默认值（便于同一镜像多环境部署）
+function resolveApiBaseUrl(): string {
+  const runtime = typeof window !== 'undefined' ? window.__APP_RUNTIME_CONFIG__?.VITE_API_BASE_URL : undefined
+  if (runtime !== undefined && runtime !== '')
+    return runtime
+  return validateEnvVar(
+    import.meta.env.VITE_API_BASE_URL,
+    envDefaults.API_BASE_URL,
+    'VITE_API_BASE_URL',
+  )
+}
+const API_BASE_URL = resolveApiBaseUrl()
 
 // 环境判断（PROD / DEV 决定代码行为，直接使用 Vite 提供的值）
 export const isDev = import.meta.env.DEV

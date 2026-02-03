@@ -32,8 +32,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # 复制自定义 nginx 配置
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# 复制入口脚本（根据环境变量生成 config.js 后启动 nginx）
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # 暴露端口
 EXPOSE 80
 
-# 启动 nginx
-CMD ["nginx", "-g", "daemon off;"]
+# 通过 entrypoint 在启动前生成运行时 config.js
+ENTRYPOINT ["/entrypoint.sh"]

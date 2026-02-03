@@ -114,6 +114,28 @@ pnpm test:ui
 pnpm run dep:check
 ```
 
+## 🐳 部署与运行镜像
+
+项目支持通过 Docker 构建并发布镜像；**同一镜像可在不同部署中通过环境变量覆盖 API 地址**，无需为每个环境重新构建。
+
+### 构建镜像
+
+```sh
+# 使用项目根目录的 build.sh（可选：传入 API 地址会在构建时写入，通常推荐用运行时覆盖）
+./build.sh [版本号] [--api-url <URL>]
+```
+
+### 运行容器时覆盖 API 地址（推荐）
+
+发布镜像后，在不同环境运行同一镜像时，通过环境变量 `VITE_API_BASE_URL` 指定后端 API 地址即可：
+
+```sh
+docker run -d -p 8080:80 -e VITE_API_BASE_URL=https://api.your-env.com your-registry/valhalla-user-admin:latest
+```
+
+- 不设置 `VITE_API_BASE_URL` 时，使用构建时的默认值（见 `src/config/env.ts` 中各 MODE 的默认配置）。
+- 构建脚本的 `--api-url` 会在**构建时**写入产物；若希望**同一镜像、多处部署、按需改 URL**，优先使用上述**运行时**环境变量，无需为每个环境打不同镜像。
+
 ## 📚 开发文档
 
 更多面向开发者的规范与实践（编码规范、测试策略、Git 工作流、部署指南等），请参考：
