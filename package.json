@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^14.2.0",
-    "axios": "^1.13.4",
+    "axios": "^1.13.5",
     "naive-ui": "^2.43.2",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
