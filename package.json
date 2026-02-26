@@ -51,7 +51,7 @@
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
     "eslint": "^9.39.2",
-    "eslint-plugin-format": "^1.4.0",
+    "eslint-plugin-format": "^2.0.1",
     "happy-dom": "^20.6.3",
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
