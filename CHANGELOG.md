@@ -1,5 +1,52 @@
 # Changelog
 
+## [1.4.0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.3.0...v1.4.0) (2026-05-06)
+
+
+### ✨ Features
+
+* **docker:** 添加运行时配置的入口点脚本并更新 nginx 设置 ([24e3817](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/24e381711e8325d439a4b6c3298a5d0ebb582798))
+
+
+### 🔧 Miscellaneous Chores
+
+* **build:** update image naming to use GitHub Container Registry ([8bda804](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/8bda80471225e047053a0f456f482e1156180b7e))
+* **deps-dev:** bump jsdom from 27.4.0 to 28.0.0 ([ecdb2f0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/ecdb2f0418e982e5833f6fa8fa6f680327215933))
+* **deps-dev:** bump the minor-and-patch group with 3 updates ([f7d7788](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/f7d778803a80c314915aa16c13e3cfc0e3d5f30b))
+* **deps-dev:** bump vite from 7.3.1 to 7.3.2 ([b9b2ae0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/b9b2ae05c49ac8e7b6d1093830c024e6f55656d6))
+* **deps:** bump actions/cache from 5.0.1 to 5.0.3 ([82f9a31](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/82f9a31b8b73c7fcab224f0b02c14cc146532ceb))
+* **deps:** bump actions/cache from 5.0.3 to 5.0.5 ([d905a39](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/d905a3939e5f58f836920f5aa220aa5459bb68d4))
+* **deps:** bump actions/checkout from 6.0.1 to 6.0.2 ([3d5120f](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/3d5120fec95d4066e3991127c48d4a49dbf14090))
+* **deps:** bump actions/download-artifact from 7.0.0 to 8.0.0 ([f0ae4ac](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/f0ae4ac5e057a5fea0def7fac608a329e7315495))
+* **deps:** bump actions/download-artifact from 8.0.0 to 8.0.1 ([2b09a00](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/2b09a0068147e49a7af40d29610b63be34b7f9a1))
+* **deps:** bump actions/github-script from 8.0.0 to 9.0.0 ([bdceab7](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/bdceab7f4eb332a506e0990ec934c1bcd3b761d2))
+* **deps:** bump actions/setup-node from 6.1.0 to 6.2.0 ([4a1a5bc](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/4a1a5bc5de577e92c08e3951efc09d5d8bc2d278))
+* **deps:** bump actions/setup-node from 6.2.0 to 6.3.0 ([dab5a34](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/dab5a3451ffad6d09a2887f71a8c16c8b445fb81))
+* **deps:** bump actions/setup-node from 6.3.0 to 6.4.0 ([c6b91c1](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/c6b91c14a18b39eaeeb8a6a02571fec8bfabe738))
+* **deps:** bump actions/upload-artifact from 6.0.0 to 7.0.0 ([2b86f98](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/2b86f981fa7407adfd798a1551f060c2e2d46ab0))
+* **deps:** bump actions/upload-artifact from 7.0.0 to 7.0.1 ([251c281](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/251c28190e356cd7b973e48f7932a5a85788f697))
+* **deps:** bump axios from 1.13.4 to 1.13.5 ([8894e65](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/8894e657715c88c9fabebd48cc997ea1d04a78df))
+* **deps:** bump docker/build-push-action from 6.18.0 to 6.19.2 ([fee9d2c](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/fee9d2ce3e4ff375b6820fb0c00ac74fdb1c1808))
+* **deps:** bump docker/build-push-action from 6.19.2 to 7.0.0 ([11fc9ad](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/11fc9ad80f8b58e789e3e1d575ebd3c8fdffa4de))
+* **deps:** bump docker/build-push-action from 7.0.0 to 7.1.0 ([d756163](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/d7561636c2cee6aa3c831df8656955ef47a0b4c7))
+* **deps:** bump docker/login-action from 3.4.0 to 3.7.0 ([8540dad](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/8540dad17e580c5787898982a6a18d6bb01b13e3))
+* **deps:** bump docker/login-action from 3.7.0 to 4.0.0 ([30567aa](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/30567aa9fd944dfabbfbb25f1bc7e57f0bb1eb6a))
+* **deps:** bump docker/login-action from 4.0.0 to 4.1.0 ([e95948e](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/e95948e2731ea2bfffe970c6be0378569a19115e))
+* **deps:** bump docker/metadata-action from 5.10.0 to 6.0.0 ([6ae65c0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/6ae65c0c493d969c082b82cf6a3c2c0ed5d05916))
+* **deps:** bump docker/metadata-action from 5.8.0 to 5.10.0 ([9d949aa](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/9d949aa4774e8e589bc7040db08751154794854d))
+* **deps:** bump docker/setup-buildx-action from 3.11.0 to 3.12.0 ([6062d91](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/6062d9171dbb3c6206370852277b7410cd4f6fa1))
+* **deps:** bump docker/setup-buildx-action from 3.12.0 to 4.0.0 ([04f7563](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/04f756367c01de5d9a3bea165b2174022e707aba))
+* **deps:** bump docker/setup-qemu-action from 3.0.0 to 3.7.0 ([cbd2778](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/cbd2778dc37150677eea62f1cd3569b274e95b73))
+* **deps:** bump docker/setup-qemu-action from 3.7.0 to 4.0.0 ([35ef93a](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/35ef93af9db5b13d7a837c9b925277dda1df713c))
+* **deps:** bump googleapis/release-please-action from 4.4.0 to 5.0.0 ([d3249ab](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/d3249ab107803ab0b2b1576844b63adba51e0d89))
+* **deps:** bump pnpm/action-setup from 4.2.0 to 4.3.0 ([a3967a6](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/a3967a6f71e4a46cf2d2bd5f5c1b989be74c84ee))
+* **deps:** bump pnpm/action-setup from 5.0.0 to 6.0.3 ([92195ed](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/92195edf25c06583a802edf56b14448b5afeae34))
+* **deps:** bump softprops/action-gh-release from 2.5.0 to 3.0.0 ([17a5bf7](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/17a5bf750f8c17befd7ddec8e3c3a4c751528313))
+* **deps:** bump the minor-and-patch group across 1 directory with 17 updates ([b6c0e3a](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/b6c0e3a1cd39e6f296065dd3ebcd3c19dbf27897))
+* **deps:** bump the minor-and-patch group across 1 directory with 9 updates ([2a03bce](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/2a03bceb24f86065881fbe2cead8b1c92a64fc83))
+* **deps:** bump the minor-and-patch group with 2 updates ([6919db1](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/6919db13dae96ec494d2d48b28abaad01454363e))
+* **deps:** bump the minor-and-patch group with 6 updates ([17636bd](https://github.com/Yggdrasil-Labs/valhalla-user-admin/commit/17636bd2bf1550deb66c349e014cd8664b177ff7))
+
 ## [1.3.0](https://github.com/Yggdrasil-Labs/valhalla-user-admin/compare/v1.2.0...v1.3.0) (2026-01-27)
 
 
