@@ -54,7 +54,7 @@
     "eslint-plugin-format": "^1.4.0",
     "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.1.1",
     "lint-staged": "^16.4.0",
     "modern-normalize": "^3.0.1",
     "sass": "^1.99.0",
