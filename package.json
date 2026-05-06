@@ -37,7 +37,7 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^7.4.3",
+    "@antfu/eslint-config": "^8.2.0",
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
